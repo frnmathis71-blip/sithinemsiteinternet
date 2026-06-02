@@ -1,1 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Restaurant Emportez</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
 
+  <header class="navbar" id="navbar">
+    <div class="nav-left">
+      <button class="search-btn" aria-label="Rechercher">
+        <span>⌕</span>
+      </button>
+
+      <a href="#carte" class="nav-button">
+        La carte
+      </a>
+    </div>
+
+    <a href="/" class="logo-wrapper" aria-label="Accueil">
+      <img src="logo.png" alt="Logo du restaurant" class="logo" />
+    </a>
+
+    <nav class="nav-right">
+      <a href="#blog" class="nav-link">Blog</a>
+
+      <a href="#connexion" class="nav-link nav-icon-link">
+        <span class="icon">☻</span>
+        <span>Se connecter</span>
+      </a>
+
+      <a href="#panier" class="nav-link nav-icon-link">
+        <span class="icon">▢</span>
+        <span>Panier</span>
+      </a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Commande à emporter</h1>
+        <p>Découvrez nos plats frais, préparés à la commande.</p>
+        <a href="#carte" class="hero-button">Voir la carte</a>
+      </div>
+    </section>
+
+    <section id="carte" class="content-section">
+      <h2>La carte</h2>
+      <p>Le contenu de la carte viendra ici.</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

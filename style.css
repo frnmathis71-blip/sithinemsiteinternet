@@ -136,9 +136,11 @@ body {
   color: var(--green);
 }
 
-.icon {
-  font-size: 24px;
-  line-height: 1;
+.nav-icon-img {
+  width: 24px;
+  height: 24px;
+  display: block;
+  object-fit: contain;
 }
 
 .hero {
@@ -320,7 +322,7 @@ body {
     gap: 12px;
   }
 
-  .nav-link span:not(.icon),
+  .nav-link span,
   .nav-right .nav-link:first-child {
     display: none;
   }
@@ -329,6 +331,11 @@ body {
     height: 38px;
     padding: 0 16px;
     font-size: 12px;
+  }
+
+  .nav-icon-img {
+    width: 26px;
+    height: 26px;
   }
 
   .menu-section {

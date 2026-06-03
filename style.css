@@ -33,17 +33,20 @@ body {
   justify-content: center;
 
   padding: 0 20%;
-  background: var(--white);
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  opacity: 1;
   border-bottom: 1px solid rgba(0, 122, 90, 0.12);
 
   transition:
-    background-color 0.45s ease,
     box-shadow 0.45s ease,
     height 0.45s ease;
 }
 
 .navbar.scrolled {
-  background: var(--white);
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  opacity: 1;
   box-shadow: 0 8px 24px rgba(4, 86, 64, 0.1);
   height: 96px;
 }

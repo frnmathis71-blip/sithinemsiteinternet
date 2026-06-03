@@ -517,6 +517,22 @@
     </section>
   </main>
 
-  <script src="script.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const modeTabs = document.querySelectorAll("[data-admin-mode]");
+      const modePanels = document.querySelectorAll("[data-admin-mode-panel]");
+
+      modeTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const target = tab.dataset.adminMode;
+          modeTabs.forEach((item) => item.classList.toggle("is-active", item === tab));
+          modePanels.forEach((panel) => {
+            panel.classList.toggle("is-active", panel.dataset.adminModePanel === target);
+          });
+        });
+      });
+    });
+  </script>
+  <script src="script.js?v=20260603-offer-tab"></script>
 </body>
 </html>

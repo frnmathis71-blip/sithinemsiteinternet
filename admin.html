@@ -1,1 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Administration - Sithinem</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="navbar" id="navbar">
+    <div class="nav-left">
+      <a href="menu.html" class="nav-button">Voir la carte</a>
+    </div>
 
+    <a href="index.html" class="logo-wrapper" aria-label="Accueil Sithinem">
+      <img src="logo.png" alt="Logo Sithinem" class="logo" />
+    </a>
+
+    <nav class="nav-right">
+      <a href="menu.html" class="nav-link">Menu</a>
+      <a href="connexion.html" class="nav-link nav-icon-link">
+        <img src="connecter.jpg" alt="" class="nav-icon-img" width="34" height="34" />
+        <span>Connexion</span>
+      </a>
+      <a href="#admin-offers" class="nav-link">Offres</a>
+    </nav>
+  </header>
+
+  <main class="page-shell admin-page">
+    <section class="page-intro admin-intro">
+      <p class="eyebrow">Espace restaurant</p>
+      <h1>Administration Sithinem</h1>
+      <p>Préparez la gestion de la carte à emporter : articles, menus, catégories et offres. Cette page sera protégée par mot de passe plus tard.</p>
+    </section>
+
+    <section class="admin-layout">
+      <form class="admin-form" id="admin-product-form">
+        <h2>Ajouter un article</h2>
+
+        <label for="product-name">Nom de l'article</label>
+        <input id="product-name" name="name" type="text" placeholder="Ex : Wok boeuf" required />
+
+        <label for="product-category">Catégorie</label>
+        <select id="product-category" name="category" required>
+          <option value="woks">Nos Woks</option>
+          <option value="snacks">Nos Snacks</option>
+          <option value="salades">Nos Salades</option>
+          <option value="boissons">Nos Boissons</option>
+          <option value="desserts">Nos Desserts</option>
+          <option value="offres">Offres / Menus</option>
+        </select>
+
+        <label for="product-description">Description</label>
+        <textarea id="product-description" name="description" rows="4" placeholder="Décrivez le produit pour les clients" required></textarea>
+
+        <label for="product-price">Prix</label>
+        <input id="product-price" name="price" type="text" placeholder="Ex : 9,90 €" required />
+
+        <button type="submit" class="primary-action">Ajouter à la carte</button>
+        <p class="form-note">Pour l'instant, l'ajout est enregistré dans le navigateur. Plus tard, il sera sauvegardé dans une base de données.</p>
+      </form>
+
+      <section class="admin-preview">
+        <div class="admin-preview-header">
+          <div>
+            <p class="eyebrow">Aperçu</p>
+            <h2>Articles ajoutés</h2>
+          </div>
+          <button type="button" class="secondary-action" id="clear-admin-items">Vider</button>
+        </div>
+        <div class="admin-added-list" id="admin-added-list"></div>
+      </section>
+    </section>
+
+    <section class="admin-tools" id="admin-offers">
+      <article>
+        <h2>Menus à emporter</h2>
+        <p>Préparez des formules comme plat + boisson + dessert pour le midi ou le soir.</p>
+      </article>
+      <article>
+        <h2>Offres spéciales</h2>
+        <p>Ajoutez des promotions temporaires : réduction, menu famille, offre du jour.</p>
+      </article>
+      <article>
+        <h2>Catégories</h2>
+        <p>Organisez les articles entre woks, snacks, salades, boissons, desserts et offres.</p>
+      </article>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

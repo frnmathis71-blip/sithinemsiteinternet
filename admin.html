@@ -37,8 +37,7 @@
       <button type="button" class="admin-tab is-active" data-admin-tab="summary">Résumé</button>
       <button type="button" class="admin-tab" data-admin-tab="orders">Commandes</button>
       <button type="button" class="admin-tab" data-admin-tab="schedule">Créneaux</button>
-      <button type="button" class="admin-tab" data-admin-tab="menu">Carte</button>
-      <button type="button" class="admin-tab" data-admin-tab="offers">Offres</button>
+      <button type="button" class="admin-tab" data-admin-tab="menu">Carte & offres</button>
     </nav>
 
     <section class="admin-panel is-active" id="admin-summary" data-admin-panel="summary">
@@ -56,7 +55,7 @@
         <article class="metric-card">
           <span>Créneaux bloqués</span>
           <strong id="summary-blocked-count">0</strong>
-          <p>Journées ou horaires indisponibles pour les clients.</p>
+          <p>Créneaux de retrait indisponibles pour les clients.</p>
         </article>
       </div>
 
@@ -68,7 +67,7 @@
           </div>
           <span class="status-pill">18h30 - 22h30</span>
         </div>
-        <p class="form-note">Les commandes seront prévues uniquement le vendredi et le samedi soir. Les jours complets ou certains créneaux pourront être bloqués depuis l’onglet Créneaux.</p>
+        <p class="form-note">Le calendrier affiche uniquement les vendredis et samedis. Les commandes sont proposées toutes les 30 minutes, et plusieurs clients pourront choisir le même créneau tant qu'il n'est pas bloqué.</p>
       </section>
     </section>
 
@@ -93,60 +92,24 @@
         <div class="admin-preview-header">
           <div>
             <p class="eyebrow">Disponibilités</p>
-            <h2>Bloquer des créneaux</h2>
+            <h2>Calendrier des créneaux</h2>
           </div>
           <span class="status-pill">Vendredi / Samedi</span>
         </div>
 
-        <form class="admin-form compact-form" id="admin-block-form">
-          <label for="blocked-date">Date à bloquer</label>
-          <input id="blocked-date" name="date" type="date" required />
+        <div class="week-controls">
+          <button type="button" class="secondary-action" id="previous-week">Semaine précédente</button>
+          <strong id="week-label">Semaine</strong>
+          <button type="button" class="secondary-action" id="next-week">Semaine suivante</button>
+        </div>
 
-          <label for="blocked-type">Type de blocage</label>
-          <select id="blocked-type" name="type" required>
-            <option value="day">Bloquer toute la soirée</option>
-            <option value="slot">Bloquer un créneau précis</option>
-          </select>
-
-          <div class="time-row" id="blocked-time-row">
-            <div>
-              <label for="blocked-start">Début</label>
-              <select id="blocked-start" name="start">
-                <option>18:30</option>
-                <option>19:00</option>
-                <option>19:30</option>
-                <option>20:00</option>
-                <option>20:30</option>
-                <option>21:00</option>
-                <option>21:30</option>
-                <option>22:00</option>
-              </select>
-            </div>
-            <div>
-              <label for="blocked-end">Fin</label>
-              <select id="blocked-end" name="end">
-                <option>19:00</option>
-                <option>19:30</option>
-                <option>20:00</option>
-                <option>20:30</option>
-                <option>21:00</option>
-                <option>21:30</option>
-                <option>22:00</option>
-                <option>22:30</option>
-              </select>
-            </div>
-          </div>
-
-          <button type="submit" class="primary-action">Bloquer</button>
-          <p class="form-note" id="schedule-note">Ouverture normale : vendredi et samedi, de 18h30 à 22h30.</p>
-        </form>
-
-        <div class="blocked-list" id="blocked-list"></div>
+        <div class="weekly-calendar" id="weekly-calendar"></div>
+        <p class="form-note">Clique sur un créneau pour le bloquer ou le rouvrir. Les créneaux sont proposés toutes les 30 minutes de 18h30 à 22h30.</p>
       </section>
     </section>
 
     <section class="admin-panel" data-admin-panel="menu">
-      <section class="admin-layout">
+      <section class="admin-management-grid">
         <form class="admin-form" id="admin-product-form">
           <h2>Ajouter un article</h2>
 
@@ -160,7 +123,6 @@
             <option value="salades">Nos Salades</option>
             <option value="boissons">Nos Boissons</option>
             <option value="desserts">Nos Desserts</option>
-            <option value="offres">Offres / Menus</option>
           </select>
 
           <label for="product-description">Description</label>
@@ -171,38 +133,48 @@
 
           <label for="product-image">Image de l'article</label>
           <input id="product-image" name="image" type="file" accept="image/*" />
-          <p class="form-note">L'image est enregistrée temporairement dans ce navigateur. Plus tard, elle sera envoyée sur l’hébergement ou la base de données.</p>
 
-          <button type="submit" class="primary-action">Ajouter à la carte</button>
+          <button type="submit" class="primary-action">Ajouter l'article</button>
         </form>
 
-        <section class="admin-preview">
-          <div class="admin-preview-header">
-            <div>
-              <p class="eyebrow">Aperçu</p>
-              <h2>Articles ajoutés</h2>
-            </div>
-            <button type="button" class="secondary-action" id="clear-admin-items">Vider</button>
-          </div>
-          <div class="admin-added-list" id="admin-added-list"></div>
-        </section>
-      </section>
-    </section>
+        <form class="admin-form" id="admin-offer-form">
+          <h2>Ajouter une offre</h2>
 
-    <section class="admin-panel" data-admin-panel="offers">
-      <section class="admin-tools" id="admin-offers">
-        <article>
-          <h2>Menus à emporter</h2>
-          <p>Préparez des formules comme plat + boisson + dessert pour le midi ou le soir.</p>
-        </article>
-        <article>
-          <h2>Offres spéciales</h2>
-          <p>Ajoutez des promotions temporaires : réduction, menu famille, offre du jour.</p>
-        </article>
-        <article>
-          <h2>Catégories</h2>
-          <p>Organisez les articles entre woks, snacks, salades, boissons, desserts et offres.</p>
-        </article>
+          <label for="offer-name">Nom de l'offre</label>
+          <input id="offer-name" name="name" type="text" placeholder="Ex : Offre Noël" required />
+
+          <label for="offer-description">Description</label>
+          <textarea id="offer-description" name="description" rows="3" placeholder="Présentez l'offre aux clients" required></textarea>
+
+          <label>Produits déjà créés</label>
+          <div class="offer-product-list" id="offer-product-list"></div>
+
+          <label for="exclusive-product-name">Produit exclusif à l'offre</label>
+          <div class="exclusive-row">
+            <input id="exclusive-product-name" type="text" placeholder="Ex : Dessert de Noël" />
+            <button type="button" class="secondary-action" id="add-exclusive-product">Ajouter</button>
+          </div>
+          <div class="exclusive-list" id="exclusive-product-list"></div>
+
+          <label for="offer-price">Prix de l'offre</label>
+          <input id="offer-price" name="price" type="text" placeholder="Ex : 24,90 €" required />
+
+          <label for="offer-image">Image de l'offre</label>
+          <input id="offer-image" name="image" type="file" accept="image/*" />
+
+          <button type="submit" class="primary-action">Ajouter l'offre</button>
+        </form>
+      </section>
+
+      <section class="admin-preview full-preview">
+        <div class="admin-preview-header">
+          <div>
+            <p class="eyebrow">Aperçu</p>
+            <h2>Articles et offres ajoutés</h2>
+          </div>
+          <button type="button" class="secondary-action" id="clear-admin-items">Vider</button>
+        </div>
+        <div class="admin-added-list" id="admin-added-list"></div>
       </section>
     </section>
   </main>

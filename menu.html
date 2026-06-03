@@ -1,1 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>La carte - Sithinem</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="navbar" id="navbar">
+    <div class="nav-left">
+      <a href="menu.html" class="nav-button">La carte</a>
+    </div>
 
+    <a href="index.html" class="logo-wrapper" aria-label="Accueil Sithinem">
+      <img src="logo.png" alt="Logo Sithinem" class="logo" />
+    </a>
+
+    <nav class="nav-right">
+      <a href="menu.html" class="nav-link">Menu</a>
+      <a href="connexion.html" class="nav-link nav-icon-link">
+        <img src="connecter.jpg" alt="" class="nav-icon-img" width="34" height="34" />
+        <span>Se connecter</span>
+      </a>
+      <a href="#panier" class="nav-link nav-icon-link">
+        <img src="panier.jpg" alt="" class="nav-icon-img" width="34" height="34" />
+        <span>Panier</span>
+      </a>
+    </nav>
+  </header>
+
+  <main class="page-shell menu-page">
+    <section class="page-intro">
+      <p class="eyebrow">Restaurant à emporter</p>
+      <h1>La carte Sithinem</h1>
+      <p>Des plats préparés à la commande, pensés pour être emportés facilement.</p>
+    </section>
+
+    <nav class="category-tabs" aria-label="Catégories de la carte">
+      <a href="#woks">Woks</a>
+      <a href="#snacks">Snacks</a>
+      <a href="#salades">Salades</a>
+      <a href="#boissons">Boissons</a>
+      <a href="#desserts">Desserts</a>
+      <a href="#offres">Offres</a>
+    </nav>
+
+    <section id="woks" class="product-section">
+      <div class="product-heading">
+        <img src="woks.jpg" alt="Woks Sithinem" />
+        <div>
+          <h2>Nos Woks</h2>
+          <p>Base nouilles ou riz, légumes croquants et sauce au choix.</p>
+        </div>
+      </div>
+      <div class="product-grid" data-category-list="woks">
+        <article class="product-card"><h3>Wok poulet</h3><p>Nouilles sautées, poulet, légumes, sauce soja.</p><strong>9,90 €</strong></article>
+        <article class="product-card"><h3>Wok crevettes</h3><p>Riz sauté, crevettes, légumes frais, sauce maison.</p><strong>11,50 €</strong></article>
+      </div>
+    </section>
+
+    <section id="snacks" class="product-section">
+      <div class="product-heading">
+        <img src="snacks.jpg" alt="Snacks Sithinem" />
+        <div>
+          <h2>Nos Snacks</h2>
+          <p>Petites faims et accompagnements à emporter.</p>
+        </div>
+      </div>
+      <div class="product-grid" data-category-list="snacks">
+        <article class="product-card"><h3>Nems poulet</h3><p>Servis avec salade, menthe et sauce.</p><strong>4,90 €</strong></article>
+        <article class="product-card"><h3>Samoussas légumes</h3><p>Croustillants, épicés avec douceur.</p><strong>4,50 €</strong></article>
+      </div>
+    </section>
+
+    <section id="salades" class="product-section">
+      <div class="product-heading">
+        <img src="salade.jpg" alt="Salades Sithinem" />
+        <div>
+          <h2>Nos Salades</h2>
+          <p>Des recettes fraîches pour une pause légère.</p>
+        </div>
+      </div>
+      <div class="product-grid" data-category-list="salades">
+        <article class="product-card"><h3>Salade poulet</h3><p>Crudités, poulet mariné, sauce légère.</p><strong>8,90 €</strong></article>
+        <article class="product-card"><h3>Salade crevettes</h3><p>Crevettes, légumes frais, herbes, citron.</p><strong>9,90 €</strong></article>
+      </div>
+    </section>
+
+    <section id="boissons" class="product-section">
+      <div class="product-heading">
+        <img src="boisson.jpg" alt="Boissons Sithinem" />
+        <div>
+          <h2>Nos Boissons</h2>
+          <p>Boissons fraîches à ajouter à votre commande.</p>
+        </div>
+      </div>
+      <div class="product-grid" data-category-list="boissons">
+        <article class="product-card"><h3>Coca-Cola</h3><p>Canette 33 cl.</p><strong>2,00 €</strong></article>
+        <article class="product-card"><h3>Eau minérale</h3><p>Bouteille 50 cl.</p><strong>1,50 €</strong></article>
+      </div>
+    </section>
+
+    <section id="desserts" class="product-section">
+      <div class="product-heading">
+        <img src="dessert.jpg" alt="Desserts Sithinem" />
+        <div>
+          <h2>Nos Desserts</h2>
+          <p>Une touche sucrée pour terminer le repas.</p>
+        </div>
+      </div>
+      <div class="product-grid" data-category-list="desserts">
+        <article class="product-card"><h3>Tiramisu</h3><p>Dessert gourmand en portion individuelle.</p><strong>3,90 €</strong></article>
+        <article class="product-card"><h3>Perles coco</h3><p>Moelleuses et légèrement sucrées.</p><strong>3,50 €</strong></article>
+      </div>
+    </section>
+
+    <section id="offres" class="product-section offer-section">
+      <div class="product-heading compact-heading">
+        <div>
+          <h2>Offres à emporter</h2>
+          <p>Les formules et promotions seront gérées depuis l'administration.</p>
+        </div>
+      </div>
+      <div class="product-grid" data-category-list="offres">
+        <article class="product-card product-offer"><h3>Menu midi</h3><p>Un plat, une boisson et un dessert.</p><strong>12,90 €</strong></article>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

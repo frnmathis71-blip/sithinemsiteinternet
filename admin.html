@@ -22,7 +22,7 @@
         <img src="connecter.jpg" alt="" class="nav-icon-img" width="34" height="34" />
         <span>Connexion</span>
       </a>
-      <a href="#admin-offers" class="nav-link">Offres</a>
+      <a href="#admin-orders" class="nav-link">Commandes</a>
     </nav>
   </header>
 
@@ -30,61 +30,180 @@
     <section class="page-intro admin-intro">
       <p class="eyebrow">Espace restaurant</p>
       <h1>Administration Sithinem</h1>
-      <p>Préparez la gestion de la carte à emporter : articles, menus, catégories et offres. Cette page sera protégée par mot de passe plus tard.</p>
+      <p>Tableau de bord temporaire pour gérer le restaurant à emporter. Cette zone sera protégée par identifiant et mot de passe plus tard.</p>
     </section>
 
-    <section class="admin-layout">
-      <form class="admin-form" id="admin-product-form">
-        <h2>Ajouter un article</h2>
+    <nav class="admin-tabs" aria-label="Navigation administration">
+      <button type="button" class="admin-tab is-active" data-admin-tab="summary">Résumé</button>
+      <button type="button" class="admin-tab" data-admin-tab="orders">Commandes</button>
+      <button type="button" class="admin-tab" data-admin-tab="schedule">Créneaux</button>
+      <button type="button" class="admin-tab" data-admin-tab="menu">Carte</button>
+      <button type="button" class="admin-tab" data-admin-tab="offers">Offres</button>
+    </nav>
 
-        <label for="product-name">Nom de l'article</label>
-        <input id="product-name" name="name" type="text" placeholder="Ex : Wok boeuf" required />
+    <section class="admin-panel is-active" id="admin-summary" data-admin-panel="summary">
+      <div class="dashboard-grid">
+        <article class="metric-card">
+          <span>Commandes du soir</span>
+          <strong>0</strong>
+          <p>Les futures commandes à emporter apparaîtront ici.</p>
+        </article>
+        <article class="metric-card">
+          <span>Articles ajoutés</span>
+          <strong id="summary-items-count">0</strong>
+          <p>Articles créés depuis cette interface temporaire.</p>
+        </article>
+        <article class="metric-card">
+          <span>Créneaux bloqués</span>
+          <strong id="summary-blocked-count">0</strong>
+          <p>Journées ou horaires indisponibles pour les clients.</p>
+        </article>
+      </div>
 
-        <label for="product-category">Catégorie</label>
-        <select id="product-category" name="category" required>
-          <option value="woks">Nos Woks</option>
-          <option value="snacks">Nos Snacks</option>
-          <option value="salades">Nos Salades</option>
-          <option value="boissons">Nos Boissons</option>
-          <option value="desserts">Nos Desserts</option>
-          <option value="offres">Offres / Menus</option>
-        </select>
-
-        <label for="product-description">Description</label>
-        <textarea id="product-description" name="description" rows="4" placeholder="Décrivez le produit pour les clients" required></textarea>
-
-        <label for="product-price">Prix</label>
-        <input id="product-price" name="price" type="text" placeholder="Ex : 9,90 €" required />
-
-        <button type="submit" class="primary-action">Ajouter à la carte</button>
-        <p class="form-note">Pour l'instant, l'ajout est enregistré dans le navigateur. Plus tard, il sera sauvegardé dans une base de données.</p>
-      </form>
-
-      <section class="admin-preview">
+      <section class="admin-card">
         <div class="admin-preview-header">
           <div>
-            <p class="eyebrow">Aperçu</p>
-            <h2>Articles ajoutés</h2>
+            <p class="eyebrow">Ouverture</p>
+            <h2>Vendredi et samedi uniquement</h2>
           </div>
-          <button type="button" class="secondary-action" id="clear-admin-items">Vider</button>
+          <span class="status-pill">18h30 - 22h30</span>
         </div>
-        <div class="admin-added-list" id="admin-added-list"></div>
+        <p class="form-note">Les commandes seront prévues uniquement le vendredi et le samedi soir. Les jours complets ou certains créneaux pourront être bloqués depuis l’onglet Créneaux.</p>
       </section>
     </section>
 
-    <section class="admin-tools" id="admin-offers">
-      <article>
-        <h2>Menus à emporter</h2>
-        <p>Préparez des formules comme plat + boisson + dessert pour le midi ou le soir.</p>
-      </article>
-      <article>
-        <h2>Offres spéciales</h2>
-        <p>Ajoutez des promotions temporaires : réduction, menu famille, offre du jour.</p>
-      </article>
-      <article>
-        <h2>Catégories</h2>
-        <p>Organisez les articles entre woks, snacks, salades, boissons, desserts et offres.</p>
-      </article>
+    <section class="admin-panel" id="admin-orders" data-admin-panel="orders">
+      <section class="admin-card">
+        <div class="admin-preview-header">
+          <div>
+            <p class="eyebrow">Gestion</p>
+            <h2>Commandes et résumé</h2>
+          </div>
+          <span class="status-pill">À venir</span>
+        </div>
+        <div class="orders-empty">
+          <h3>Aucune commande pour le moment</h3>
+          <p>Quand le panier et le paiement seront reliés au site, les commandes à emporter s'afficheront ici avec l'heure de retrait, le statut et le total.</p>
+        </div>
+      </section>
+    </section>
+
+    <section class="admin-panel" data-admin-panel="schedule">
+      <section class="admin-card">
+        <div class="admin-preview-header">
+          <div>
+            <p class="eyebrow">Disponibilités</p>
+            <h2>Bloquer des créneaux</h2>
+          </div>
+          <span class="status-pill">Vendredi / Samedi</span>
+        </div>
+
+        <form class="admin-form compact-form" id="admin-block-form">
+          <label for="blocked-date">Date à bloquer</label>
+          <input id="blocked-date" name="date" type="date" required />
+
+          <label for="blocked-type">Type de blocage</label>
+          <select id="blocked-type" name="type" required>
+            <option value="day">Bloquer toute la soirée</option>
+            <option value="slot">Bloquer un créneau précis</option>
+          </select>
+
+          <div class="time-row" id="blocked-time-row">
+            <div>
+              <label for="blocked-start">Début</label>
+              <select id="blocked-start" name="start">
+                <option>18:30</option>
+                <option>19:00</option>
+                <option>19:30</option>
+                <option>20:00</option>
+                <option>20:30</option>
+                <option>21:00</option>
+                <option>21:30</option>
+                <option>22:00</option>
+              </select>
+            </div>
+            <div>
+              <label for="blocked-end">Fin</label>
+              <select id="blocked-end" name="end">
+                <option>19:00</option>
+                <option>19:30</option>
+                <option>20:00</option>
+                <option>20:30</option>
+                <option>21:00</option>
+                <option>21:30</option>
+                <option>22:00</option>
+                <option>22:30</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="primary-action">Bloquer</button>
+          <p class="form-note" id="schedule-note">Ouverture normale : vendredi et samedi, de 18h30 à 22h30.</p>
+        </form>
+
+        <div class="blocked-list" id="blocked-list"></div>
+      </section>
+    </section>
+
+    <section class="admin-panel" data-admin-panel="menu">
+      <section class="admin-layout">
+        <form class="admin-form" id="admin-product-form">
+          <h2>Ajouter un article</h2>
+
+          <label for="product-name">Nom de l'article</label>
+          <input id="product-name" name="name" type="text" placeholder="Ex : Wok boeuf" required />
+
+          <label for="product-category">Catégorie</label>
+          <select id="product-category" name="category" required>
+            <option value="woks">Nos Woks</option>
+            <option value="snacks">Nos Snacks</option>
+            <option value="salades">Nos Salades</option>
+            <option value="boissons">Nos Boissons</option>
+            <option value="desserts">Nos Desserts</option>
+            <option value="offres">Offres / Menus</option>
+          </select>
+
+          <label for="product-description">Description</label>
+          <textarea id="product-description" name="description" rows="4" placeholder="Décrivez le produit pour les clients" required></textarea>
+
+          <label for="product-price">Prix</label>
+          <input id="product-price" name="price" type="text" placeholder="Ex : 9,90 €" required />
+
+          <label for="product-image">Image de l'article</label>
+          <input id="product-image" name="image" type="file" accept="image/*" />
+          <p class="form-note">L'image est enregistrée temporairement dans ce navigateur. Plus tard, elle sera envoyée sur l’hébergement ou la base de données.</p>
+
+          <button type="submit" class="primary-action">Ajouter à la carte</button>
+        </form>
+
+        <section class="admin-preview">
+          <div class="admin-preview-header">
+            <div>
+              <p class="eyebrow">Aperçu</p>
+              <h2>Articles ajoutés</h2>
+            </div>
+            <button type="button" class="secondary-action" id="clear-admin-items">Vider</button>
+          </div>
+          <div class="admin-added-list" id="admin-added-list"></div>
+        </section>
+      </section>
+    </section>
+
+    <section class="admin-panel" data-admin-panel="offers">
+      <section class="admin-tools" id="admin-offers">
+        <article>
+          <h2>Menus à emporter</h2>
+          <p>Préparez des formules comme plat + boisson + dessert pour le midi ou le soir.</p>
+        </article>
+        <article>
+          <h2>Offres spéciales</h2>
+          <p>Ajoutez des promotions temporaires : réduction, menu famille, offre du jour.</p>
+        </article>
+        <article>
+          <h2>Catégories</h2>
+          <p>Organisez les articles entre woks, snacks, salades, boissons, desserts et offres.</p>
+        </article>
+      </section>
     </section>
   </main>
 

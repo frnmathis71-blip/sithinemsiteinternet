@@ -5,6 +5,145 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Administration - Sithinem</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .admin-management-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 28px;
+      align-items: start;
+      margin-bottom: 28px;
+    }
+
+    .full-preview {
+      padding: 26px;
+    }
+
+    .offer-product-list,
+    .exclusive-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .choice-row,
+    .exclusive-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px;
+      background: var(--green-soft);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--green-dark);
+      font-weight: 700;
+    }
+
+    .choice-row {
+      justify-content: flex-start;
+    }
+
+    .choice-row input {
+      width: auto;
+    }
+
+    .exclusive-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .exclusive-chip button {
+      border: 0;
+      background: transparent;
+      color: var(--green-dark);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .small-empty {
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    .offer-details {
+      display: grid;
+      gap: 6px;
+      margin: 0 0 16px 18px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .week-controls {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .week-controls strong {
+      text-align: center;
+      color: var(--green-dark);
+      font-size: 18px;
+    }
+
+    .weekly-calendar {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      margin-bottom: 16px;
+    }
+
+    .calendar-day {
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .calendar-day h3 {
+      margin-bottom: 16px;
+      color: var(--green-dark);
+      text-transform: capitalize;
+    }
+
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .slot-button {
+      min-height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--green-soft);
+      color: var(--green-dark);
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .slot-button.is-blocked {
+      background: var(--green-dark);
+      color: var(--white);
+      border-color: var(--green-dark);
+    }
+
+    @media (max-width: 900px) {
+      .admin-management-grid,
+      .weekly-calendar,
+      .week-controls,
+      .exclusive-row {
+        grid-template-columns: 1fr;
+      }
+
+      .week-controls strong {
+        text-align: left;
+      }
+    }
+  </style>
 </head>
 <body>
   <header class="navbar" id="navbar">

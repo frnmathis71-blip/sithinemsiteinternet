@@ -146,18 +146,34 @@ function updateAdminSummary() {
   }
 }
 
-function initAdminTabs() {
+function activateAdminTab(target) {
   const tabs = document.querySelectorAll("[data-admin-tab]");
   const panels = document.querySelectorAll("[data-admin-panel]");
 
   tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      const target = tab.dataset.adminTab;
+    tab.classList.toggle("is-active", tab.dataset.adminTab === target);
+  });
 
-      tabs.forEach((item) => item.classList.toggle("is-active", item === tab));
-      panels.forEach((panel) => {
-        panel.classList.toggle("is-active", panel.dataset.adminPanel === target);
-      });
+  panels.forEach((panel) => {
+    panel.classList.toggle("is-active", panel.dataset.adminPanel === target);
+  });
+}
+
+function initAdminTabs() {
+  const tabs = document.querySelectorAll("[data-admin-tab]");
+  const openers = document.querySelectorAll("[data-admin-open]");
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      activateAdminTab(tab.dataset.adminTab);
+    });
+  });
+
+  openers.forEach((opener) => {
+    opener.addEventListener("click", (event) => {
+      event.preventDefault();
+      activateAdminTab(opener.dataset.adminOpen);
+      document.querySelector(".admin-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
 }

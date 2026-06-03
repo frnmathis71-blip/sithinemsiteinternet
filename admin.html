@@ -6,25 +6,201 @@
   <title>Administration - Sithinem</title>
   <link rel="stylesheet" href="style.css" />
   <style>
+    .admin-mode-tabs {
+      display: inline-flex;
+      gap: 8px;
+      padding: 8px;
+      margin: 0 0 24px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .admin-mode-tab {
+      min-height: 42px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--green-soft);
+      color: var(--green-dark);
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .admin-mode-tab.is-active {
+      background: var(--green);
+      color: var(--white);
+    }
+
+    .admin-mode-panel {
+      display: none;
+    }
+
+    .admin-mode-panel.is-active {
+      display: block;
+    }
+
     .admin-management-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: minmax(320px, 430px) 1fr;
       gap: 28px;
       align-items: start;
       margin-bottom: 28px;
     }
 
-    .full-preview {
-      padding: 26px;
+    .offer-builder {
+      display: grid;
+      grid-template-columns: minmax(320px, 1fr) minmax(280px, 360px);
+      gap: 24px;
+      align-items: start;
     }
 
-    .offer-product-list,
+    .offer-builder-main,
+    .offer-summary-card,
+    .full-preview {
+      padding: 26px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .offer-builder-main h2,
+    .offer-summary-card h2 {
+      color: var(--green-dark);
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .offer-fields {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .offer-fields label,
+    .exclusive-panel label {
+      color: var(--green-dark);
+      font-weight: 800;
+    }
+
+    .offer-fields input,
+    .offer-fields textarea,
+    .exclusive-panel input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 13px 14px;
+      color: var(--text);
+      font: inherit;
+      background: var(--white);
+    }
+
+    .offer-compose-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 18px 0 14px;
+    }
+
+    .offer-compose-title h3 {
+      color: var(--green-dark);
+      font-size: 20px;
+    }
+
+    .offer-product-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .select-product-card {
+      overflow: hidden;
+      min-height: 168px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: var(--white);
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .select-product-card:hover,
+    .select-product-card.is-selected {
+      border-color: var(--green);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(4, 86, 64, 0.12);
+    }
+
+    .select-product-card.is-selected {
+      background: linear-gradient(180deg, var(--white), var(--green-soft));
+    }
+
+    .select-product-card img {
+      width: 100%;
+      height: 96px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .select-product-body {
+      padding: 12px;
+    }
+
+    .select-product-body h4 {
+      color: var(--text);
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .select-product-body span {
+      color: var(--green-dark);
+      font-weight: 800;
+    }
+
+    .select-product-action {
+      display: inline-flex;
+      margin-top: 10px;
+      padding: 6px 9px;
+      border-radius: 6px;
+      background: var(--green-soft);
+      color: var(--green-dark);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .select-product-card.is-selected .select-product-action {
+      background: var(--green);
+      color: var(--white);
+    }
+
+    .exclusive-panel {
+      display: grid;
+      gap: 10px;
+      margin-top: 22px;
+      padding: 18px;
+      background: var(--green-soft);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .exclusive-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .offer-summary-list,
     .exclusive-list {
       display: grid;
       gap: 10px;
     }
 
-    .choice-row,
+    .summary-line,
     .exclusive-chip {
       display: flex;
       align-items: center;
@@ -38,20 +214,7 @@
       font-weight: 700;
     }
 
-    .choice-row {
-      justify-content: flex-start;
-    }
-
-    .choice-row input {
-      width: auto;
-    }
-
-    .exclusive-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-    }
-
+    .summary-line button,
     .exclusive-chip button {
       border: 0;
       background: transparent;
@@ -60,9 +223,14 @@
       cursor: pointer;
     }
 
+    .offer-summary-empty,
     .small-empty {
-      padding: 12px;
-      font-size: 14px;
+      padding: 14px;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      background: var(--green-soft);
+      color: var(--muted);
+      line-height: 1.5;
     }
 
     .offer-details {
@@ -131,11 +299,16 @@
       border-color: var(--green-dark);
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 1000px) {
       .admin-management-grid,
+      .offer-builder,
       .weekly-calendar,
       .week-controls,
       .exclusive-row {
+        grid-template-columns: 1fr;
+      }
+
+      .offer-product-list {
         grid-template-columns: 1fr;
       }
 
@@ -248,72 +421,98 @@
     </section>
 
     <section class="admin-panel" data-admin-panel="menu">
-      <section class="admin-management-grid">
-        <form class="admin-form" id="admin-product-form">
-          <h2>Ajouter un article</h2>
+      <div class="admin-mode-tabs" aria-label="Gestion de la carte">
+        <button type="button" class="admin-mode-tab is-active" data-admin-mode="article">Article</button>
+        <button type="button" class="admin-mode-tab" data-admin-mode="offer">Offre</button>
+      </div>
 
-          <label for="product-name">Nom de l'article</label>
-          <input id="product-name" name="name" type="text" placeholder="Ex : Wok boeuf" required />
+      <section class="admin-mode-panel is-active" data-admin-mode-panel="article">
+        <section class="admin-management-grid">
+          <form class="admin-form" id="admin-product-form">
+            <h2>Ajouter un article</h2>
 
-          <label for="product-category">Catégorie</label>
-          <select id="product-category" name="category" required>
-            <option value="woks">Nos Woks</option>
-            <option value="snacks">Nos Snacks</option>
-            <option value="salades">Nos Salades</option>
-            <option value="boissons">Nos Boissons</option>
-            <option value="desserts">Nos Desserts</option>
-          </select>
+            <label for="product-name">Nom de l'article</label>
+            <input id="product-name" name="name" type="text" placeholder="Ex : Wok boeuf" required />
 
-          <label for="product-description">Description</label>
-          <textarea id="product-description" name="description" rows="4" placeholder="Décrivez le produit pour les clients" required></textarea>
+            <label for="product-category">Catégorie</label>
+            <select id="product-category" name="category" required>
+              <option value="woks">Nos Woks</option>
+              <option value="snacks">Nos Snacks</option>
+              <option value="salades">Nos Salades</option>
+              <option value="boissons">Nos Boissons</option>
+              <option value="desserts">Nos Desserts</option>
+            </select>
 
-          <label for="product-price">Prix</label>
-          <input id="product-price" name="price" type="text" placeholder="Ex : 9,90 €" required />
+            <label for="product-description">Description</label>
+            <textarea id="product-description" name="description" rows="4" placeholder="Décrivez le produit pour les clients" required></textarea>
 
-          <label for="product-image">Image de l'article</label>
-          <input id="product-image" name="image" type="file" accept="image/*" />
+            <label for="product-price">Prix</label>
+            <input id="product-price" name="price" type="text" placeholder="Ex : 9,90 €" required />
 
-          <button type="submit" class="primary-action">Ajouter l'article</button>
-        </form>
+            <label for="product-image">Image de l'article</label>
+            <input id="product-image" name="image" type="file" accept="image/*" />
 
-        <form class="admin-form" id="admin-offer-form">
-          <h2>Ajouter une offre</h2>
+            <button type="submit" class="primary-action">Ajouter l'article</button>
+          </form>
 
-          <label for="offer-name">Nom de l'offre</label>
-          <input id="offer-name" name="name" type="text" placeholder="Ex : Offre Noël" required />
-
-          <label for="offer-description">Description</label>
-          <textarea id="offer-description" name="description" rows="3" placeholder="Présentez l'offre aux clients" required></textarea>
-
-          <label>Produits déjà créés</label>
-          <div class="offer-product-list" id="offer-product-list"></div>
-
-          <label for="exclusive-product-name">Produit exclusif à l'offre</label>
-          <div class="exclusive-row">
-            <input id="exclusive-product-name" type="text" placeholder="Ex : Dessert de Noël" />
-            <button type="button" class="secondary-action" id="add-exclusive-product">Ajouter</button>
-          </div>
-          <div class="exclusive-list" id="exclusive-product-list"></div>
-
-          <label for="offer-price">Prix de l'offre</label>
-          <input id="offer-price" name="price" type="text" placeholder="Ex : 24,90 €" required />
-
-          <label for="offer-image">Image de l'offre</label>
-          <input id="offer-image" name="image" type="file" accept="image/*" />
-
-          <button type="submit" class="primary-action">Ajouter l'offre</button>
-        </form>
+          <section class="admin-preview full-preview">
+            <div class="admin-preview-header">
+              <div>
+                <p class="eyebrow">Aperçu</p>
+                <h2>Articles et offres ajoutés</h2>
+              </div>
+              <button type="button" class="secondary-action" id="clear-admin-items">Vider</button>
+            </div>
+            <div class="admin-added-list" id="admin-added-list"></div>
+          </section>
+        </section>
       </section>
 
-      <section class="admin-preview full-preview">
-        <div class="admin-preview-header">
-          <div>
-            <p class="eyebrow">Aperçu</p>
-            <h2>Articles et offres ajoutés</h2>
-          </div>
-          <button type="button" class="secondary-action" id="clear-admin-items">Vider</button>
-        </div>
-        <div class="admin-added-list" id="admin-added-list"></div>
+      <section class="admin-mode-panel" data-admin-mode-panel="offer">
+        <form class="offer-builder" id="admin-offer-form">
+          <section class="offer-builder-main">
+            <h2>Composer une offre</h2>
+            <p class="form-note">Sélectionne les produits comme dans une commande, puis ajoute si besoin des produits exclusifs à l'offre.</p>
+
+            <div class="offer-fields">
+              <label for="offer-name">Nom de l'offre</label>
+              <input id="offer-name" name="name" type="text" placeholder="Ex : Offre Noël" required />
+
+              <label for="offer-description">Description</label>
+              <textarea id="offer-description" name="description" rows="3" placeholder="Présentez l'offre aux clients" required></textarea>
+            </div>
+
+            <div class="offer-compose-title">
+              <h3>Produits disponibles</h3>
+              <span class="status-pill">Cliquer pour ajouter</span>
+            </div>
+            <div class="offer-product-list" id="offer-product-list"></div>
+
+            <div class="exclusive-panel">
+              <label for="exclusive-product-name">Ajouter un produit exclusif</label>
+              <div class="exclusive-row">
+                <input id="exclusive-product-name" type="text" placeholder="Ex : Dessert de Noël" />
+                <button type="button" class="secondary-action" id="add-exclusive-product">Ajouter</button>
+              </div>
+              <div class="exclusive-list" id="exclusive-product-list"></div>
+            </div>
+          </section>
+
+          <aside class="offer-summary-card">
+            <h2>Récapitulatif</h2>
+            <div class="offer-summary-list" id="offer-summary-list"></div>
+
+            <div class="offer-fields">
+              <label for="offer-price">Prix de l'offre</label>
+              <input id="offer-price" name="price" type="text" placeholder="Ex : 24,90 €" required />
+
+              <label for="offer-image">Image de l'offre</label>
+              <input id="offer-image" name="image" type="file" accept="image/*" />
+            </div>
+
+            <button type="submit" class="primary-action">Ajouter l'offre</button>
+          </aside>
+        </form>
       </section>
     </section>
   </main>

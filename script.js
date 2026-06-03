@@ -1,58 +1,73 @@
 const navbar = document.getElementById("navbar");
 const STORAGE_KEY = "sithinemMenuItems";
+const CATEGORY_STORAGE_KEY = "sithinemMenuCategories";
 const BLOCKED_STORAGE_KEY = "sithinemBlockedSlots";
 const SLOT_TIMES = ["18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00"];
+const DEFAULT_CATEGORIES = [
+  { id: "woks", label: "Nos Woks" },
+  { id: "snacks", label: "Nos Snacks" },
+  { id: "salades", label: "Nos Salades" },
+  { id: "boissons", label: "Nos Boissons" },
+  { id: "desserts", label: "Nos Desserts" },
+  { id: "offres", label: "Offres" },
+];
 let currentWeekStart = getStartOfWeek(new Date());
-let exclusiveProducts = [];
-let selectedOfferProducts = [];
+let activeMenuCategory = getCategories()[0]?.id || "woks";
+let selectedMenuItemId = null;
 
 function handleNavbarScroll() {
-  if (!navbar) {
-    return;
-  }
+  if (!navbar) return;
+  navbar.classList.toggle("scrolled", window.scrollY > 30);
+}
 
-  if (window.scrollY > 30) {
-    navbar.classList.add("scrolled");
-  } else {
-    navbar.classList.remove("scrolled");
+function readJson(key, fallback) {
+  try {
+    return JSON.parse(localStorage.getItem(key)) || fallback;
+  } catch (error) {
+    return fallback;
   }
+}
+
+function writeJson(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
 }
 
 function getStoredItems() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  } catch (error) {
-    return [];
-  }
+  return readJson(STORAGE_KEY, []).map((item) => ({ visible: true, ...item }));
 }
 
 function saveStoredItems(items) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  writeJson(STORAGE_KEY, items);
+}
+
+function getCategories() {
+  const stored = readJson(CATEGORY_STORAGE_KEY, null);
+  return Array.isArray(stored) && stored.length ? stored : DEFAULT_CATEGORIES;
+}
+
+function saveCategories(categories) {
+  writeJson(CATEGORY_STORAGE_KEY, categories);
 }
 
 function getBlockedSlots() {
-  try {
-    return JSON.parse(localStorage.getItem(BLOCKED_STORAGE_KEY)) || [];
-  } catch (error) {
-    return [];
-  }
+  return readJson(BLOCKED_STORAGE_KEY, []);
 }
 
 function saveBlockedSlots(slots) {
-  localStorage.setItem(BLOCKED_STORAGE_KEY, JSON.stringify(slots));
+  writeJson(BLOCKED_STORAGE_KEY, slots);
 }
 
-function getCategoryLabel(category) {
-  const labels = {
-    woks: "Nos Woks",
-    snacks: "Nos Snacks",
-    salades: "Nos Salades",
-    boissons: "Nos Boissons",
-    desserts: "Nos Desserts",
-    offres: "Offres / Menus",
-  };
+function slugify(value) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "") || `onglet-${Date.now()}`;
+}
 
-  return labels[category] || category;
+function createId() {
+  return crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
 }
 
 function fileToDataUrl(file) {
@@ -61,7 +76,6 @@ function fileToDataUrl(file) {
       resolve("");
       return;
     }
-
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
     reader.onerror = () => resolve("");
@@ -69,7 +83,13 @@ function fileToDataUrl(file) {
   });
 }
 
+function getCategoryLabel(categoryId) {
+  return getCategories().find((category) => category.id === categoryId)?.label || categoryId;
+}
+
 function createProductCard(item) {
+  if (item.visible === false) return document.createDocumentFragment();
+
   const card = document.createElement("article");
   card.className = item.category === "offres" ? "product-card product-offer" : "product-card";
 
@@ -83,10 +103,8 @@ function createProductCard(item) {
 
   const title = document.createElement("h3");
   title.textContent = item.name;
-
   const description = document.createElement("p");
   description.textContent = item.description;
-
   const price = document.createElement("strong");
   price.textContent = item.price;
 
@@ -95,13 +113,11 @@ function createProductCard(item) {
   if (item.offerProducts?.length || item.exclusiveProducts?.length) {
     const details = document.createElement("ul");
     details.className = "offer-details";
-
     [...(item.offerProducts || []), ...(item.exclusiveProducts || [])].forEach((product) => {
       const detail = document.createElement("li");
       detail.textContent = product;
       details.appendChild(detail);
     });
-
     card.appendChild(details);
   }
 
@@ -110,11 +126,9 @@ function createProductCard(item) {
 }
 
 function renderMenuItems() {
-  const items = getStoredItems();
-
-  items.forEach((item) => {
+  getStoredItems().forEach((item) => {
     const list = document.querySelector(`[data-category-list="${item.category}"]`);
-    if (list) {
+    if (list && item.visible !== false) {
       list.appendChild(createProductCard(item));
     }
   });
@@ -123,71 +137,24 @@ function renderMenuItems() {
 function updateAdminSummary() {
   const itemCount = document.getElementById("summary-items-count");
   const blockedCount = document.getElementById("summary-blocked-count");
-
-  if (itemCount) {
-    itemCount.textContent = getStoredItems().length;
-  }
-
-  if (blockedCount) {
-    blockedCount.textContent = getBlockedSlots().length;
-  }
-}
-
-function renderAdminItems() {
-  const list = document.getElementById("admin-added-list");
-  if (!list) {
-    updateAdminSummary();
-    return;
-  }
-
-  const items = getStoredItems();
-  list.innerHTML = "";
-
-  if (items.length === 0) {
-    const empty = document.createElement("p");
-    empty.className = "empty-state";
-    empty.textContent = "Aucun article ou offre ajouté pour le moment.";
-    list.appendChild(empty);
-    updateAdminSummary();
-    renderOfferProductList();
-    return;
-  }
-
-  items.forEach((item) => {
-    const card = createProductCard(item);
-    const category = document.createElement("span");
-    category.className = "admin-category-label";
-    category.textContent = getCategoryLabel(item.category);
-    card.prepend(category);
-    list.appendChild(card);
-  });
-
-  updateAdminSummary();
-  renderOfferProductList();
+  if (itemCount) itemCount.textContent = getStoredItems().filter((item) => item.visible !== false).length;
+  if (blockedCount) blockedCount.textContent = getBlockedSlots().length;
 }
 
 function activateAdminTab(target) {
-  const tabs = document.querySelectorAll("[data-admin-tab]");
-  const panels = document.querySelectorAll("[data-admin-panel]");
-
-  tabs.forEach((tab) => {
+  document.querySelectorAll("[data-admin-tab]").forEach((tab) => {
     tab.classList.toggle("is-active", tab.dataset.adminTab === target);
   });
-
-  panels.forEach((panel) => {
+  document.querySelectorAll("[data-admin-panel]").forEach((panel) => {
     panel.classList.toggle("is-active", panel.dataset.adminPanel === target);
   });
 }
 
 function initAdminTabs() {
-  const tabs = document.querySelectorAll("[data-admin-tab]");
-  const openers = document.querySelectorAll("[data-admin-open]");
-
-  tabs.forEach((tab) => {
+  document.querySelectorAll("[data-admin-tab]").forEach((tab) => {
     tab.addEventListener("click", () => activateAdminTab(tab.dataset.adminTab));
   });
-
-  openers.forEach((opener) => {
+  document.querySelectorAll("[data-admin-open]").forEach((opener) => {
     opener.addEventListener("click", (event) => {
       event.preventDefault();
       activateAdminTab(opener.dataset.adminOpen);
@@ -196,251 +163,247 @@ function initAdminTabs() {
   });
 }
 
-function initAdminModeTabs() {
-  const tabs = document.querySelectorAll("[data-admin-mode]");
-  const panels = document.querySelectorAll("[data-admin-mode-panel]");
+function renderMiniMenuTabs() {
+  const tabs = document.getElementById("mini-menu-tabs");
+  if (!tabs) return;
 
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      const target = tab.dataset.adminMode;
-      tabs.forEach((item) => item.classList.toggle("is-active", item === tab));
-      panels.forEach((panel) => panel.classList.toggle("is-active", panel.dataset.adminModePanel === target));
-      renderOfferProductList();
-      renderOfferSummary();
-    });
-  });
-}
-
-function initProductForm() {
-  const form = document.getElementById("admin-product-form");
-  const clearButton = document.getElementById("clear-admin-items");
-
-  if (!form) {
-    return;
+  const categories = getCategories();
+  if (!categories.some((category) => category.id === activeMenuCategory)) {
+    activeMenuCategory = categories[0]?.id || "woks";
   }
 
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const formData = new FormData(form);
-    const item = {
-      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-      type: "article",
-      name: formData.get("name").trim(),
-      category: formData.get("category"),
-      description: formData.get("description").trim(),
-      price: formData.get("price").trim(),
-      image: await fileToDataUrl(formData.get("image")),
-    };
-
-    const items = getStoredItems();
-    items.push(item);
-    saveStoredItems(items);
-    form.reset();
-    renderAdminItems();
-    renderOfferSummary();
-  });
-
-  if (clearButton) {
-    clearButton.addEventListener("click", () => {
-      saveStoredItems([]);
-      exclusiveProducts = [];
-      selectedOfferProducts = [];
-      renderExclusiveProducts();
-      renderAdminItems();
-      renderOfferSummary();
-    });
-  }
-}
-
-function renderOfferProductList() {
-  const list = document.getElementById("offer-product-list");
-  if (!list) {
-    return;
-  }
-
-  const articles = getStoredItems().filter((item) => item.category !== "offres");
-  list.innerHTML = "";
-
-  if (articles.length === 0) {
-    const empty = document.createElement("p");
-    empty.className = "offer-summary-empty";
-    empty.textContent = "Crée d'abord un article, puis il apparaîtra ici comme un produit sélectionnable.";
-    list.appendChild(empty);
-    return;
-  }
-
-  selectedOfferProducts = selectedOfferProducts.filter((selected) => articles.some((article) => article.id === selected.id));
-
-  articles.forEach((item) => {
-    const selected = selectedOfferProducts.some((product) => product.id === item.id);
+  tabs.innerHTML = "";
+  categories.forEach((category) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = selected ? "select-product-card is-selected" : "select-product-card";
+    button.className = category.id === activeMenuCategory ? "mini-menu-tab is-active" : "mini-menu-tab";
+    button.textContent = category.label;
+    button.addEventListener("click", () => {
+      activeMenuCategory = category.id;
+      selectedMenuItemId = null;
+      renderMiniMenu();
+      renderEditor();
+    });
+    tabs.appendChild(button);
+  });
+}
+
+function renderMiniMenu() {
+  renderMiniMenuTabs();
+  const grid = document.getElementById("mini-menu-grid");
+  if (!grid) return;
+
+  const items = getStoredItems().filter((item) => item.category === activeMenuCategory);
+  grid.innerHTML = "";
+
+  if (items.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "editor-empty";
+    empty.textContent = "Aucun élément dans cet onglet pour le moment.";
+    grid.appendChild(empty);
+    return;
+  }
+
+  items.forEach((item) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "mini-menu-card";
+    card.classList.toggle("is-selected", item.id === selectedMenuItemId);
+    card.classList.toggle("is-hidden", item.visible === false);
 
     if (item.image) {
       const image = document.createElement("img");
       image.src = item.image;
       image.alt = item.name;
-      button.appendChild(image);
+      card.appendChild(image);
     }
 
     const body = document.createElement("div");
-    body.className = "select-product-body";
-
-    const name = document.createElement("h4");
-    name.textContent = item.name;
-
+    body.className = "mini-card-body";
+    const title = document.createElement("h3");
+    title.textContent = item.name || "Sans nom";
+    const description = document.createElement("p");
+    description.textContent = item.description || "Sans description";
+    const meta = document.createElement("div");
+    meta.className = "mini-card-meta";
     const price = document.createElement("span");
-    price.textContent = item.price;
-
-    const action = document.createElement("strong");
-    action.className = "select-product-action";
-    action.textContent = selected ? "Sélectionné" : "Ajouter";
-
-    body.append(name, price, action);
-    button.appendChild(body);
-    button.addEventListener("click", () => toggleOfferProduct(item));
-    list.appendChild(button);
-  });
-}
-
-function toggleOfferProduct(item) {
-  const exists = selectedOfferProducts.some((product) => product.id === item.id);
-  selectedOfferProducts = exists
-    ? selectedOfferProducts.filter((product) => product.id !== item.id)
-    : [...selectedOfferProducts, { id: item.id, name: item.name, price: item.price }];
-
-  renderOfferProductList();
-  renderOfferSummary();
-}
-
-function renderOfferSummary() {
-  const list = document.getElementById("offer-summary-list");
-  if (!list) {
-    return;
-  }
-
-  list.innerHTML = "";
-  const hasSelection = selectedOfferProducts.length > 0 || exclusiveProducts.length > 0;
-
-  if (!hasSelection) {
-    const empty = document.createElement("p");
-    empty.className = "offer-summary-empty";
-    empty.textContent = "Aucun produit dans l'offre pour le moment.";
-    list.appendChild(empty);
-    return;
-  }
-
-  selectedOfferProducts.forEach((product) => {
-    list.appendChild(createSummaryLine(product.name, () => {
-      selectedOfferProducts = selectedOfferProducts.filter((item) => item.id !== product.id);
-      renderOfferProductList();
-      renderOfferSummary();
-    }));
-  });
-
-  exclusiveProducts.forEach((product, index) => {
-    list.appendChild(createSummaryLine(product, () => {
-      exclusiveProducts.splice(index, 1);
-      renderExclusiveProducts();
-      renderOfferSummary();
-    }));
-  });
-}
-
-function createSummaryLine(text, onRemove) {
-  const line = document.createElement("div");
-  line.className = "summary-line";
-
-  const label = document.createElement("span");
-  label.textContent = text;
-
-  const button = document.createElement("button");
-  button.type = "button";
-  button.textContent = "Retirer";
-  button.addEventListener("click", onRemove);
-
-  line.append(label, button);
-  return line;
-}
-
-function renderExclusiveProducts() {
-  const list = document.getElementById("exclusive-product-list");
-  if (!list) {
-    return;
-  }
-
-  list.innerHTML = "";
-
-  exclusiveProducts.forEach((product, index) => {
-    const item = document.createElement("div");
-    item.className = "exclusive-chip";
-
-    const text = document.createElement("span");
-    text.textContent = product;
-
-    const button = document.createElement("button");
-    button.type = "button";
-    button.textContent = "Retirer";
-    button.addEventListener("click", () => {
-      exclusiveProducts.splice(index, 1);
-      renderExclusiveProducts();
-      renderOfferSummary();
+    price.textContent = item.price || "Prix non défini";
+    const state = document.createElement("span");
+    state.className = item.visible === false ? "hidden-pill" : "type-pill";
+    state.textContent = item.visible === false ? "Masqué" : item.type === "offer" ? "Offre" : "Article";
+    meta.append(price, state);
+    body.append(title, description, meta);
+    card.appendChild(body);
+    card.addEventListener("click", () => {
+      selectedMenuItemId = item.id;
+      renderMiniMenu();
+      renderEditor();
     });
-
-    item.append(text, button);
-    list.appendChild(item);
+    grid.appendChild(card);
   });
 }
 
-function initOfferForm() {
-  const form = document.getElementById("admin-offer-form");
-  const addExclusiveButton = document.getElementById("add-exclusive-product");
-  const exclusiveInput = document.getElementById("exclusive-product-name");
+function renderEditor() {
+  const editor = document.getElementById("admin-editor");
+  if (!editor) return;
 
-  if (!form) {
+  const items = getStoredItems();
+  const item = items.find((entry) => entry.id === selectedMenuItemId);
+  const categories = getCategories();
+
+  if (!item) {
+    editor.innerHTML = `<h2>Détail</h2><p class="editor-empty">Clique sur un article ou une offre de la mini-carte pour modifier ses informations.</p>`;
     return;
   }
 
-  addExclusiveButton?.addEventListener("click", () => {
-    const value = exclusiveInput.value.trim();
-    if (!value) {
-      return;
-    }
+  editor.innerHTML = `
+    <h2>${item.type === "offer" ? "Modifier l'offre" : "Modifier l'article"}</h2>
+    <label for="edit-name">Nom</label>
+    <input id="edit-name" type="text" value="${escapeAttribute(item.name || "")}" />
+    <label for="edit-category">Onglet</label>
+    <select id="edit-category">
+      ${categories.map((category) => `<option value="${category.id}" ${category.id === item.category ? "selected" : ""}>${category.label}</option>`).join("")}
+    </select>
+    <label for="edit-description">Description</label>
+    <textarea id="edit-description" rows="4">${escapeHtml(item.description || "")}</textarea>
+    <label for="edit-price">Prix</label>
+    <input id="edit-price" type="text" value="${escapeAttribute(item.price || "")}" />
+    <label for="edit-image">Image</label>
+    <input id="edit-image" type="file" accept="image/*" />
+    ${item.type === "offer" ? `
+      <label for="edit-offer-lines">Produits dans l'offre</label>
+      <textarea id="edit-offer-lines" rows="4">${escapeHtml([...(item.offerProducts || []), ...(item.exclusiveProducts || [])].join("\n"))}</textarea>
+    ` : ""}
+    <div class="editor-actions">
+      <button type="button" class="secondary-action" id="toggle-visible">${item.visible === false ? "Rendre visible" : "Masquer"}</button>
+      <button type="button" class="danger-action" id="delete-item">Supprimer</button>
+    </div>
+    <button type="button" class="primary-action" id="save-item">Enregistrer</button>
+  `;
 
-    exclusiveProducts.push(value);
-    exclusiveInput.value = "";
-    renderExclusiveProducts();
-    renderOfferSummary();
-  });
+  document.getElementById("save-item").addEventListener("click", saveEditedItem);
+  document.getElementById("toggle-visible").addEventListener("click", toggleEditedItemVisibility);
+  document.getElementById("delete-item").addEventListener("click", deleteEditedItem);
+}
 
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const formData = new FormData(form);
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char]);
+}
 
-    const offer = {
-      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-      type: "offer",
-      name: formData.get("name").trim(),
-      category: "offres",
-      description: formData.get("description").trim(),
-      price: formData.get("price").trim(),
-      image: await fileToDataUrl(formData.get("image")),
-      offerProducts: selectedOfferProducts.map((product) => product.name),
-      exclusiveProducts: [...exclusiveProducts],
-    };
+function escapeAttribute(value) {
+  return escapeHtml(value).replace(/'/g, "&#39;");
+}
 
-    const items = getStoredItems();
-    items.push(offer);
-    saveStoredItems(items);
-    exclusiveProducts = [];
-    selectedOfferProducts = [];
-    form.reset();
-    renderExclusiveProducts();
-    renderAdminItems();
-    renderOfferProductList();
-    renderOfferSummary();
-  });
+async function saveEditedItem() {
+  const items = getStoredItems();
+  const index = items.findIndex((entry) => entry.id === selectedMenuItemId);
+  if (index === -1) return;
+
+  const image = await fileToDataUrl(document.getElementById("edit-image").files[0]);
+  const nextCategory = document.getElementById("edit-category").value;
+  items[index] = {
+    ...items[index],
+    name: document.getElementById("edit-name").value.trim(),
+    category: nextCategory,
+    description: document.getElementById("edit-description").value.trim(),
+    price: document.getElementById("edit-price").value.trim(),
+    image: image || items[index].image,
+  };
+
+  if (items[index].type === "offer") {
+    items[index].offerProducts = document.getElementById("edit-offer-lines").value.split("\n").map((line) => line.trim()).filter(Boolean);
+    items[index].exclusiveProducts = [];
+  }
+
+  saveStoredItems(items);
+  activeMenuCategory = nextCategory;
+  renderMiniMenu();
+  renderEditor();
+  updateAdminSummary();
+}
+
+function toggleEditedItemVisibility() {
+  const items = getStoredItems();
+  const index = items.findIndex((entry) => entry.id === selectedMenuItemId);
+  if (index === -1) return;
+  items[index].visible = items[index].visible === false;
+  saveStoredItems(items);
+  renderMiniMenu();
+  renderEditor();
+  updateAdminSummary();
+}
+
+function deleteEditedItem() {
+  const items = getStoredItems().filter((entry) => entry.id !== selectedMenuItemId);
+  selectedMenuItemId = null;
+  saveStoredItems(items);
+  renderMiniMenu();
+  renderEditor();
+  updateAdminSummary();
+}
+
+function createMenuItem(type) {
+  const category = type === "offer" ? (getCategories().find((item) => item.id === "offres")?.id || activeMenuCategory) : activeMenuCategory;
+  const item = {
+    id: createId(),
+    type,
+    category,
+    name: type === "offer" ? "Nouvelle offre" : "Nouvel article",
+    description: "Description à compléter",
+    price: "0,00 €",
+    image: "",
+    visible: false,
+    offerProducts: type === "offer" ? [] : undefined,
+    exclusiveProducts: type === "offer" ? [] : undefined,
+  };
+  const items = getStoredItems();
+  items.push(item);
+  saveStoredItems(items);
+  activeMenuCategory = category;
+  selectedMenuItemId = item.id;
+  renderMiniMenu();
+  renderEditor();
+  updateAdminSummary();
+}
+
+function initMiniMenuAdmin() {
+  if (!document.getElementById("mini-menu-grid")) return;
+
+  document.getElementById("create-article")?.addEventListener("click", () => createMenuItem("article"));
+  document.getElementById("create-offer")?.addEventListener("click", () => createMenuItem("offer"));
+  document.getElementById("add-menu-tab")?.addEventListener("click", addMenuTab);
+  document.getElementById("delete-menu-tab")?.addEventListener("click", deleteActiveMenuTab);
+  renderMiniMenu();
+  renderEditor();
+}
+
+function addMenuTab() {
+  const input = document.getElementById("new-menu-tab-name");
+  const label = input.value.trim();
+  if (!label) return;
+  const categories = getCategories();
+  let id = slugify(label);
+  if (categories.some((category) => category.id === id)) id = `${id}-${Date.now()}`;
+  categories.push({ id, label });
+  saveCategories(categories);
+  activeMenuCategory = id;
+  input.value = "";
+  renderMiniMenu();
+  renderEditor();
+}
+
+function deleteActiveMenuTab() {
+  const categories = getCategories();
+  if (categories.length <= 1) return;
+  const nextCategories = categories.filter((category) => category.id !== activeMenuCategory);
+  const items = getStoredItems().filter((item) => item.category !== activeMenuCategory);
+  saveCategories(nextCategories);
+  saveStoredItems(items);
+  activeMenuCategory = nextCategories[0].id;
+  selectedMenuItemId = null;
+  renderMiniMenu();
+  renderEditor();
+  updateAdminSummary();
 }
 
 function getStartOfWeek(date) {
@@ -462,11 +425,7 @@ function formatDateValue(date) {
 }
 
 function formatDateLabel(date) {
-  return date.toLocaleDateString("fr-FR", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-  });
+  return date.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long" });
 }
 
 function getSlotKey(dateValue, time) {
@@ -476,7 +435,6 @@ function getSlotKey(dateValue, time) {
 function renderWeeklyCalendar() {
   const calendar = document.getElementById("weekly-calendar");
   const label = document.getElementById("week-label");
-
   if (!calendar) {
     updateAdminSummary();
     return;
@@ -485,21 +443,15 @@ function renderWeeklyCalendar() {
   const friday = addDays(currentWeekStart, 4);
   const saturday = addDays(currentWeekStart, 5);
   const blockedSlots = getBlockedSlots();
-
-  if (label) {
-    label.textContent = `Semaine du ${currentWeekStart.toLocaleDateString("fr-FR")}`;
-  }
-
+  if (label) label.textContent = `Semaine du ${currentWeekStart.toLocaleDateString("fr-FR")}`;
   calendar.innerHTML = "";
 
   [friday, saturday].forEach((date) => {
     const dateValue = formatDateValue(date);
     const day = document.createElement("section");
     day.className = "calendar-day";
-
     const title = document.createElement("h3");
     title.textContent = formatDateLabel(date);
-
     const slots = document.createElement("div");
     slots.className = "slot-grid";
 
@@ -518,32 +470,25 @@ function renderWeeklyCalendar() {
     day.append(title, slots);
     calendar.appendChild(day);
   });
-
   updateAdminSummary();
 }
 
 function toggleBlockedSlot(key) {
   const blockedSlots = getBlockedSlots();
   const exists = blockedSlots.includes(key);
-  const nextSlots = exists ? blockedSlots.filter((slot) => slot !== key) : [...blockedSlots, key];
-  saveBlockedSlots(nextSlots);
+  saveBlockedSlots(exists ? blockedSlots.filter((slot) => slot !== key) : [...blockedSlots, key]);
   renderWeeklyCalendar();
 }
 
 function initWeeklyCalendar() {
-  const previous = document.getElementById("previous-week");
-  const next = document.getElementById("next-week");
-
-  previous?.addEventListener("click", () => {
+  document.getElementById("previous-week")?.addEventListener("click", () => {
     currentWeekStart = addDays(currentWeekStart, -7);
     renderWeeklyCalendar();
   });
-
-  next?.addEventListener("click", () => {
+  document.getElementById("next-week")?.addEventListener("click", () => {
     currentWeekStart = addDays(currentWeekStart, 7);
     renderWeeklyCalendar();
   });
-
   renderWeeklyCalendar();
 }
 
@@ -551,12 +496,6 @@ window.addEventListener("scroll", handleNavbarScroll);
 handleNavbarScroll();
 renderMenuItems();
 initAdminTabs();
-initAdminModeTabs();
-initProductForm();
-initOfferForm();
-renderAdminItems();
-renderOfferProductList();
-renderExclusiveProducts();
-renderOfferSummary();
+initMiniMenuAdmin();
 initWeeklyCalendar();
 updateAdminSummary();

@@ -4,6 +4,7 @@ const BLOCKED_STORAGE_KEY = "sithinemBlockedSlots";
 const SLOT_TIMES = ["18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00"];
 let currentWeekStart = getStartOfWeek(new Date());
 let exclusiveProducts = [];
+let selectedOfferProducts = [];
 
 function handleNavbarScroll() {
   if (!navbar) {
@@ -195,6 +196,21 @@ function initAdminTabs() {
   });
 }
 
+function initAdminModeTabs() {
+  const tabs = document.querySelectorAll("[data-admin-mode]");
+  const panels = document.querySelectorAll("[data-admin-mode-panel]");
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const target = tab.dataset.adminMode;
+      tabs.forEach((item) => item.classList.toggle("is-active", item === tab));
+      panels.forEach((panel) => panel.classList.toggle("is-active", panel.dataset.adminModePanel === target));
+      renderOfferProductList();
+      renderOfferSummary();
+    });
+  });
+}
+
 function initProductForm() {
   const form = document.getElementById("admin-product-form");
   const clearButton = document.getElementById("clear-admin-items");
@@ -221,14 +237,17 @@ function initProductForm() {
     saveStoredItems(items);
     form.reset();
     renderAdminItems();
+    renderOfferSummary();
   });
 
   if (clearButton) {
     clearButton.addEventListener("click", () => {
       saveStoredItems([]);
       exclusiveProducts = [];
+      selectedOfferProducts = [];
       renderExclusiveProducts();
       renderAdminItems();
+      renderOfferSummary();
     });
   }
 }
@@ -244,27 +263,105 @@ function renderOfferProductList() {
 
   if (articles.length === 0) {
     const empty = document.createElement("p");
-    empty.className = "empty-state small-empty";
-    empty.textContent = "Aucun produit créé pour le moment.";
+    empty.className = "offer-summary-empty";
+    empty.textContent = "Crée d'abord un article, puis il apparaîtra ici comme un produit sélectionnable.";
     list.appendChild(empty);
     return;
   }
 
+  selectedOfferProducts = selectedOfferProducts.filter((selected) => articles.some((article) => article.id === selected.id));
+
   articles.forEach((item) => {
-    const label = document.createElement("label");
-    label.className = "choice-row";
+    const selected = selectedOfferProducts.some((product) => product.id === item.id);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = selected ? "select-product-card is-selected" : "select-product-card";
 
-    const input = document.createElement("input");
-    input.type = "checkbox";
-    input.name = "existingProducts";
-    input.value = item.name;
+    if (item.image) {
+      const image = document.createElement("img");
+      image.src = item.image;
+      image.alt = item.name;
+      button.appendChild(image);
+    }
 
-    const span = document.createElement("span");
-    span.textContent = `${item.name} - ${item.price}`;
+    const body = document.createElement("div");
+    body.className = "select-product-body";
 
-    label.append(input, span);
-    list.appendChild(label);
+    const name = document.createElement("h4");
+    name.textContent = item.name;
+
+    const price = document.createElement("span");
+    price.textContent = item.price;
+
+    const action = document.createElement("strong");
+    action.className = "select-product-action";
+    action.textContent = selected ? "Sélectionné" : "Ajouter";
+
+    body.append(name, price, action);
+    button.appendChild(body);
+    button.addEventListener("click", () => toggleOfferProduct(item));
+    list.appendChild(button);
   });
+}
+
+function toggleOfferProduct(item) {
+  const exists = selectedOfferProducts.some((product) => product.id === item.id);
+  selectedOfferProducts = exists
+    ? selectedOfferProducts.filter((product) => product.id !== item.id)
+    : [...selectedOfferProducts, { id: item.id, name: item.name, price: item.price }];
+
+  renderOfferProductList();
+  renderOfferSummary();
+}
+
+function renderOfferSummary() {
+  const list = document.getElementById("offer-summary-list");
+  if (!list) {
+    return;
+  }
+
+  list.innerHTML = "";
+  const hasSelection = selectedOfferProducts.length > 0 || exclusiveProducts.length > 0;
+
+  if (!hasSelection) {
+    const empty = document.createElement("p");
+    empty.className = "offer-summary-empty";
+    empty.textContent = "Aucun produit dans l'offre pour le moment.";
+    list.appendChild(empty);
+    return;
+  }
+
+  selectedOfferProducts.forEach((product) => {
+    list.appendChild(createSummaryLine(product.name, () => {
+      selectedOfferProducts = selectedOfferProducts.filter((item) => item.id !== product.id);
+      renderOfferProductList();
+      renderOfferSummary();
+    }));
+  });
+
+  exclusiveProducts.forEach((product, index) => {
+    list.appendChild(createSummaryLine(product, () => {
+      exclusiveProducts.splice(index, 1);
+      renderExclusiveProducts();
+      renderOfferSummary();
+    }));
+  });
+}
+
+function createSummaryLine(text, onRemove) {
+  const line = document.createElement("div");
+  line.className = "summary-line";
+
+  const label = document.createElement("span");
+  label.textContent = text;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = "Retirer";
+  button.addEventListener("click", onRemove);
+
+  line.append(label, button);
+  return line;
 }
 
 function renderExclusiveProducts() {
@@ -288,6 +385,7 @@ function renderExclusiveProducts() {
     button.addEventListener("click", () => {
       exclusiveProducts.splice(index, 1);
       renderExclusiveProducts();
+      renderOfferSummary();
     });
 
     item.append(text, button);
@@ -313,12 +411,12 @@ function initOfferForm() {
     exclusiveProducts.push(value);
     exclusiveInput.value = "";
     renderExclusiveProducts();
+    renderOfferSummary();
   });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(form);
-    const selectedProducts = Array.from(form.querySelectorAll('input[name="existingProducts"]:checked')).map((input) => input.value);
 
     const offer = {
       id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
@@ -328,7 +426,7 @@ function initOfferForm() {
       description: formData.get("description").trim(),
       price: formData.get("price").trim(),
       image: await fileToDataUrl(formData.get("image")),
-      offerProducts: selectedProducts,
+      offerProducts: selectedOfferProducts.map((product) => product.name),
       exclusiveProducts: [...exclusiveProducts],
     };
 
@@ -336,9 +434,12 @@ function initOfferForm() {
     items.push(offer);
     saveStoredItems(items);
     exclusiveProducts = [];
+    selectedOfferProducts = [];
     form.reset();
     renderExclusiveProducts();
     renderAdminItems();
+    renderOfferProductList();
+    renderOfferSummary();
   });
 }
 
@@ -450,10 +551,12 @@ window.addEventListener("scroll", handleNavbarScroll);
 handleNavbarScroll();
 renderMenuItems();
 initAdminTabs();
+initAdminModeTabs();
 initProductForm();
 initOfferForm();
 renderAdminItems();
 renderOfferProductList();
 renderExclusiveProducts();
+renderOfferSummary();
 initWeeklyCalendar();
 updateAdminSummary();

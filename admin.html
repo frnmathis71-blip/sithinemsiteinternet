@@ -6,239 +6,21 @@
   <title>Administration - Sithinem</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    .admin-mode-tabs {
-      display: inline-flex;
-      gap: 8px;
-      padding: 8px;
-      margin: 0 0 24px;
+    .admin-card-soft,
+    .admin-editor,
+    .mini-menu-card,
+    .menu-tab-manager,
+    .calendar-day {
       background: var(--white);
       border: 1px solid var(--border);
       border-radius: 8px;
       box-shadow: var(--shadow);
     }
 
-    .admin-mode-tab {
-      min-height: 42px;
-      padding: 0 18px;
-      border: 0;
-      border-radius: 6px;
-      background: var(--green-soft);
-      color: var(--green-dark);
-      font: inherit;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .admin-mode-tab.is-active {
-      background: var(--green);
-      color: var(--white);
-    }
-
-    .admin-mode-panel {
-      display: none;
-    }
-
-    .admin-mode-panel.is-active {
-      display: block;
-    }
-
-    .admin-management-grid {
-      display: grid;
-      grid-template-columns: minmax(320px, 430px) 1fr;
-      gap: 28px;
-      align-items: start;
-      margin-bottom: 28px;
-    }
-
-    .offer-builder {
-      display: grid;
-      grid-template-columns: minmax(320px, 1fr) minmax(280px, 360px);
-      gap: 24px;
-      align-items: start;
-    }
-
-    .offer-builder-main,
-    .offer-summary-card,
-    .full-preview {
-      padding: 26px;
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      box-shadow: var(--shadow);
-    }
-
-    .offer-builder-main h2,
-    .offer-summary-card h2 {
-      color: var(--green-dark);
-      font-size: 28px;
-      margin-bottom: 8px;
-    }
-
-    .offer-fields {
-      display: grid;
-      gap: 12px;
-      margin-bottom: 22px;
-    }
-
-    .offer-fields label,
-    .exclusive-panel label {
-      color: var(--green-dark);
-      font-weight: 800;
-    }
-
-    .offer-fields input,
-    .offer-fields textarea,
-    .exclusive-panel input {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 13px 14px;
-      color: var(--text);
-      font: inherit;
-      background: var(--white);
-    }
-
-    .offer-compose-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin: 18px 0 14px;
-    }
-
-    .offer-compose-title h3 {
-      color: var(--green-dark);
-      font-size: 20px;
-    }
-
-    .offer-product-list {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .select-product-card {
-      overflow: hidden;
-      min-height: 168px;
-      border: 2px solid var(--border);
-      border-radius: 8px;
-      background: var(--white);
-      text-align: left;
-      cursor: pointer;
-      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .select-product-card:hover,
-    .select-product-card.is-selected {
-      border-color: var(--green);
-      transform: translateY(-1px);
-      box-shadow: 0 10px 24px rgba(4, 86, 64, 0.12);
-    }
-
-    .select-product-card.is-selected {
-      background: linear-gradient(180deg, var(--white), var(--green-soft));
-    }
-
-    .select-product-card img {
-      width: 100%;
-      height: 96px;
-      object-fit: cover;
-      display: block;
-    }
-
-    .select-product-body {
-      padding: 12px;
-    }
-
-    .select-product-body h4 {
-      color: var(--text);
-      font-size: 16px;
-      margin-bottom: 4px;
-    }
-
-    .select-product-body span {
-      color: var(--green-dark);
-      font-weight: 800;
-    }
-
-    .select-product-action {
-      display: inline-flex;
-      margin-top: 10px;
-      padding: 6px 9px;
-      border-radius: 6px;
-      background: var(--green-soft);
-      color: var(--green-dark);
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    .select-product-card.is-selected .select-product-action {
-      background: var(--green);
-      color: var(--white);
-    }
-
-    .exclusive-panel {
-      display: grid;
-      gap: 10px;
-      margin-top: 22px;
-      padding: 18px;
-      background: var(--green-soft);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-    }
-
-    .exclusive-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-    }
-
-    .offer-summary-list,
-    .exclusive-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .summary-line,
-    .exclusive-chip {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px;
-      background: var(--green-soft);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--green-dark);
-      font-weight: 700;
-    }
-
-    .summary-line button,
-    .exclusive-chip button {
-      border: 0;
-      background: transparent;
-      color: var(--green-dark);
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .offer-summary-empty,
-    .small-empty {
-      padding: 14px;
-      border: 1px dashed var(--border);
-      border-radius: 8px;
-      background: var(--green-soft);
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .offer-details {
-      display: grid;
-      gap: 6px;
-      margin: 0 0 16px 18px;
-      color: var(--muted);
-      line-height: 1.4;
+    .admin-card-soft,
+    .admin-editor,
+    .menu-tab-manager {
+      padding: 24px;
     }
 
     .week-controls {
@@ -264,10 +46,6 @@
 
     .calendar-day {
       padding: 20px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--white);
-      box-shadow: var(--shadow);
     }
 
     .calendar-day h3 {
@@ -299,21 +77,217 @@
       border-color: var(--green-dark);
     }
 
-    @media (max-width: 1000px) {
-      .admin-management-grid,
-      .offer-builder,
+    .menu-admin-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 380px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .menu-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .menu-tab-manager {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .menu-tab-add {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .menu-tab-add input,
+    .admin-editor input,
+    .admin-editor select,
+    .admin-editor textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 13px;
+      color: var(--text);
+      font: inherit;
+      background: var(--white);
+    }
+
+    .mini-menu-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .mini-menu-tab {
+      min-height: 40px;
+      padding: 0 14px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--green-soft);
+      color: var(--green-dark);
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .mini-menu-tab.is-active {
+      background: var(--green);
+      color: var(--white);
+    }
+
+    .mini-menu-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .mini-menu-card {
+      overflow: hidden;
+      min-height: 210px;
+      text-align: left;
+      cursor: pointer;
+      border-width: 2px;
+      transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+    }
+
+    .mini-menu-card:hover,
+    .mini-menu-card.is-selected {
+      border-color: var(--green);
+      transform: translateY(-1px);
+    }
+
+    .mini-menu-card.is-hidden {
+      opacity: .55;
+      filter: grayscale(.25);
+    }
+
+    .mini-menu-card img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      display: block;
+      background: var(--green-soft);
+    }
+
+    .mini-card-body {
+      padding: 14px;
+    }
+
+    .mini-card-body h3 {
+      color: var(--text);
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .mini-card-body p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+      min-height: 38px;
+      margin-bottom: 10px;
+    }
+
+    .mini-card-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--green-dark);
+      font-weight: 800;
+    }
+
+    .hidden-pill,
+    .type-pill {
+      display: inline-flex;
+      width: fit-content;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: var(--green-soft);
+      color: var(--green-dark);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .admin-editor {
+      position: sticky;
+      top: 122px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .admin-editor h2 {
+      color: var(--green-dark);
+      font-size: 26px;
+    }
+
+    .admin-editor label {
+      color: var(--green-dark);
+      font-weight: 800;
+    }
+
+    .editor-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .danger-action {
+      min-height: 42px;
+      border: 0;
+      border-radius: 6px;
+      background: #ffe8e2;
+      color: #963213;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .editor-empty {
+      color: var(--muted);
+      line-height: 1.6;
+      padding: 16px;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      background: var(--green-soft);
+    }
+
+    .offer-lines-editor {
+      display: grid;
+      gap: 8px;
+    }
+
+    .offer-lines-editor input {
+      margin-top: 0;
+    }
+
+    @media (max-width: 1100px) {
+      .menu-admin-layout,
       .weekly-calendar,
-      .week-controls,
-      .exclusive-row {
+      .week-controls {
         grid-template-columns: 1fr;
       }
 
-      .offer-product-list {
-        grid-template-columns: 1fr;
+      .admin-editor {
+        position: static;
       }
 
-      .week-controls strong {
-        text-align: left;
+      .mini-menu-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 700px) {
+      .mini-menu-grid,
+      .menu-tab-add,
+      .editor-actions {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -349,7 +323,7 @@
       <button type="button" class="admin-tab is-active" data-admin-tab="summary">Résumé</button>
       <button type="button" class="admin-tab" data-admin-tab="orders">Commandes</button>
       <button type="button" class="admin-tab" data-admin-tab="schedule">Créneaux</button>
-      <button type="button" class="admin-tab" data-admin-tab="menu">Carte & offres</button>
+      <button type="button" class="admin-tab" data-admin-tab="menu">Carte</button>
     </nav>
 
     <section class="admin-panel is-active" id="admin-summary" data-admin-panel="summary">
@@ -360,9 +334,9 @@
           <p>Les futures commandes à emporter apparaîtront ici.</p>
         </article>
         <article class="metric-card">
-          <span>Articles ajoutés</span>
+          <span>Articles visibles</span>
           <strong id="summary-items-count">0</strong>
-          <p>Articles créés depuis cette interface temporaire.</p>
+          <p>Produits et offres visibles sur la carte.</p>
         </article>
         <article class="metric-card">
           <span>Créneaux bloqués</span>
@@ -371,7 +345,7 @@
         </article>
       </div>
 
-      <section class="admin-card">
+      <section class="admin-card-soft">
         <div class="admin-preview-header">
           <div>
             <p class="eyebrow">Ouverture</p>
@@ -384,7 +358,7 @@
     </section>
 
     <section class="admin-panel" id="admin-orders" data-admin-panel="orders">
-      <section class="admin-card">
+      <section class="admin-card-soft">
         <div class="admin-preview-header">
           <div>
             <p class="eyebrow">Gestion</p>
@@ -400,7 +374,7 @@
     </section>
 
     <section class="admin-panel" data-admin-panel="schedule">
-      <section class="admin-card">
+      <section class="admin-card-soft">
         <div class="admin-preview-header">
           <div>
             <p class="eyebrow">Disponibilités</p>
@@ -421,118 +395,40 @@
     </section>
 
     <section class="admin-panel" data-admin-panel="menu">
-      <div class="admin-mode-tabs" aria-label="Gestion de la carte">
-        <button type="button" class="admin-mode-tab is-active" data-admin-mode="article">Article</button>
-        <button type="button" class="admin-mode-tab" data-admin-mode="offer">Offre</button>
-      </div>
-
-      <section class="admin-mode-panel is-active" data-admin-mode-panel="article">
-        <section class="admin-management-grid">
-          <form class="admin-form" id="admin-product-form">
-            <h2>Ajouter un article</h2>
-
-            <label for="product-name">Nom de l'article</label>
-            <input id="product-name" name="name" type="text" placeholder="Ex : Wok boeuf" required />
-
-            <label for="product-category">Catégorie</label>
-            <select id="product-category" name="category" required>
-              <option value="woks">Nos Woks</option>
-              <option value="snacks">Nos Snacks</option>
-              <option value="salades">Nos Salades</option>
-              <option value="boissons">Nos Boissons</option>
-              <option value="desserts">Nos Desserts</option>
-            </select>
-
-            <label for="product-description">Description</label>
-            <textarea id="product-description" name="description" rows="4" placeholder="Décrivez le produit pour les clients" required></textarea>
-
-            <label for="product-price">Prix</label>
-            <input id="product-price" name="price" type="text" placeholder="Ex : 9,90 €" required />
-
-            <label for="product-image">Image de l'article</label>
-            <input id="product-image" name="image" type="file" accept="image/*" />
-
-            <button type="submit" class="primary-action">Ajouter l'article</button>
-          </form>
-
-          <section class="admin-preview full-preview">
-            <div class="admin-preview-header">
-              <div>
-                <p class="eyebrow">Aperçu</p>
-                <h2>Articles et offres ajoutés</h2>
-              </div>
-              <button type="button" class="secondary-action" id="clear-admin-items">Vider</button>
-            </div>
-            <div class="admin-added-list" id="admin-added-list"></div>
-          </section>
-        </section>
+      <section class="menu-tab-manager">
+        <div class="admin-preview-header">
+          <div>
+            <p class="eyebrow">Onglets de carte</p>
+            <h2>Carte modulable</h2>
+          </div>
+          <button type="button" class="secondary-action" id="delete-menu-tab">Supprimer l'onglet actif</button>
+        </div>
+        <div class="menu-tab-add">
+          <input id="new-menu-tab-name" type="text" placeholder="Ex : Menus de Noël" />
+          <button type="button" class="primary-action" id="add-menu-tab">Ajouter un onglet</button>
+        </div>
       </section>
 
-      <section class="admin-mode-panel" data-admin-mode-panel="offer">
-        <form class="offer-builder" id="admin-offer-form">
-          <section class="offer-builder-main">
-            <h2>Composer une offre</h2>
-            <p class="form-note">Sélectionne les produits comme dans une commande, puis ajoute si besoin des produits exclusifs à l'offre.</p>
-
-            <div class="offer-fields">
-              <label for="offer-name">Nom de l'offre</label>
-              <input id="offer-name" name="name" type="text" placeholder="Ex : Offre Noël" required />
-
-              <label for="offer-description">Description</label>
-              <textarea id="offer-description" name="description" rows="3" placeholder="Présentez l'offre aux clients" required></textarea>
+      <section class="menu-admin-layout">
+        <div>
+          <div class="menu-toolbar">
+            <div class="mini-menu-tabs" id="mini-menu-tabs"></div>
+            <div class="menu-toolbar-actions">
+              <button type="button" class="secondary-action" id="create-article">Nouvel article</button>
+              <button type="button" class="primary-action" id="create-offer">Nouvelle offre</button>
             </div>
+          </div>
+          <div class="mini-menu-grid" id="mini-menu-grid"></div>
+        </div>
 
-            <div class="offer-compose-title">
-              <h3>Produits disponibles</h3>
-              <span class="status-pill">Cliquer pour ajouter</span>
-            </div>
-            <div class="offer-product-list" id="offer-product-list"></div>
-
-            <div class="exclusive-panel">
-              <label for="exclusive-product-name">Ajouter un produit exclusif</label>
-              <div class="exclusive-row">
-                <input id="exclusive-product-name" type="text" placeholder="Ex : Dessert de Noël" />
-                <button type="button" class="secondary-action" id="add-exclusive-product">Ajouter</button>
-              </div>
-              <div class="exclusive-list" id="exclusive-product-list"></div>
-            </div>
-          </section>
-
-          <aside class="offer-summary-card">
-            <h2>Récapitulatif</h2>
-            <div class="offer-summary-list" id="offer-summary-list"></div>
-
-            <div class="offer-fields">
-              <label for="offer-price">Prix de l'offre</label>
-              <input id="offer-price" name="price" type="text" placeholder="Ex : 24,90 €" required />
-
-              <label for="offer-image">Image de l'offre</label>
-              <input id="offer-image" name="image" type="file" accept="image/*" />
-            </div>
-
-            <button type="submit" class="primary-action">Ajouter l'offre</button>
-          </aside>
-        </form>
+        <aside class="admin-editor" id="admin-editor">
+          <h2>Détail</h2>
+          <p class="editor-empty">Clique sur un article ou une offre de la mini-carte pour modifier ses informations.</p>
+        </aside>
       </section>
     </section>
   </main>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const modeTabs = document.querySelectorAll("[data-admin-mode]");
-      const modePanels = document.querySelectorAll("[data-admin-mode-panel]");
-
-      modeTabs.forEach((tab) => {
-        tab.addEventListener("click", () => {
-          const target = tab.dataset.adminMode;
-          modeTabs.forEach((item) => item.classList.toggle("is-active", item === tab));
-          modePanels.forEach((panel) => {
-            panel.classList.toggle("is-active", panel.dataset.adminModePanel === target);
-          });
-        });
-      });
-    });
-  </script>
-  <script src="script.js?v=20260603-offer-tab"></script>
+  <script src="script.js?v=20260603-mini-menu-admin"></script>
 </body>
 </html>

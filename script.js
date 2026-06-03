@@ -1,7 +1,9 @@
 const navbar = document.getElementById("navbar");
 const STORAGE_KEY = "sithinemMenuItems";
 const BLOCKED_STORAGE_KEY = "sithinemBlockedSlots";
-const OPEN_DAYS = [5, 6];
+const SLOT_TIMES = ["18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00"];
+let currentWeekStart = getStartOfWeek(new Date());
+let exclusiveProducts = [];
 
 function handleNavbarScroll() {
   if (!navbar) {
@@ -54,7 +56,7 @@ function getCategoryLabel(category) {
 
 function fileToDataUrl(file) {
   return new Promise((resolve) => {
-    if (!file) {
+    if (!file || !file.size) {
       resolve("");
       return;
     }
@@ -87,7 +89,22 @@ function createProductCard(item) {
   const price = document.createElement("strong");
   price.textContent = item.price;
 
-  card.append(title, description, price);
+  card.append(title, description);
+
+  if (item.offerProducts?.length || item.exclusiveProducts?.length) {
+    const details = document.createElement("ul");
+    details.className = "offer-details";
+
+    [...(item.offerProducts || []), ...(item.exclusiveProducts || [])].forEach((product) => {
+      const detail = document.createElement("li");
+      detail.textContent = product;
+      details.appendChild(detail);
+    });
+
+    card.appendChild(details);
+  }
+
+  card.appendChild(price);
   return card;
 }
 
@@ -100,6 +117,19 @@ function renderMenuItems() {
       list.appendChild(createProductCard(item));
     }
   });
+}
+
+function updateAdminSummary() {
+  const itemCount = document.getElementById("summary-items-count");
+  const blockedCount = document.getElementById("summary-blocked-count");
+
+  if (itemCount) {
+    itemCount.textContent = getStoredItems().length;
+  }
+
+  if (blockedCount) {
+    blockedCount.textContent = getBlockedSlots().length;
+  }
 }
 
 function renderAdminItems() {
@@ -115,9 +145,10 @@ function renderAdminItems() {
   if (items.length === 0) {
     const empty = document.createElement("p");
     empty.className = "empty-state";
-    empty.textContent = "Aucun article ajouté pour le moment.";
+    empty.textContent = "Aucun article ou offre ajouté pour le moment.";
     list.appendChild(empty);
     updateAdminSummary();
+    renderOfferProductList();
     return;
   }
 
@@ -131,19 +162,7 @@ function renderAdminItems() {
   });
 
   updateAdminSummary();
-}
-
-function updateAdminSummary() {
-  const itemCount = document.getElementById("summary-items-count");
-  const blockedCount = document.getElementById("summary-blocked-count");
-
-  if (itemCount) {
-    itemCount.textContent = getStoredItems().length;
-  }
-
-  if (blockedCount) {
-    blockedCount.textContent = getBlockedSlots().length;
-  }
+  renderOfferProductList();
 }
 
 function activateAdminTab(target) {
@@ -164,9 +183,7 @@ function initAdminTabs() {
   const openers = document.querySelectorAll("[data-admin-open]");
 
   tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      activateAdminTab(tab.dataset.adminTab);
-    });
+    tab.addEventListener("click", () => activateAdminTab(tab.dataset.adminTab));
   });
 
   openers.forEach((opener) => {
@@ -178,7 +195,7 @@ function initAdminTabs() {
   });
 }
 
-function initAdminForm() {
+function initProductForm() {
   const form = document.getElementById("admin-product-form");
   const clearButton = document.getElementById("clear-admin-items");
 
@@ -188,21 +205,20 @@ function initAdminForm() {
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-
     const formData = new FormData(form);
-    const imageFile = formData.get("image");
     const item = {
+      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+      type: "article",
       name: formData.get("name").trim(),
       category: formData.get("category"),
       description: formData.get("description").trim(),
       price: formData.get("price").trim(),
-      image: await fileToDataUrl(imageFile),
+      image: await fileToDataUrl(formData.get("image")),
     };
 
     const items = getStoredItems();
     items.push(item);
     saveStoredItems(items);
-
     form.reset();
     renderAdminItems();
   });
@@ -210,133 +226,234 @@ function initAdminForm() {
   if (clearButton) {
     clearButton.addEventListener("click", () => {
       saveStoredItems([]);
+      exclusiveProducts = [];
+      renderExclusiveProducts();
       renderAdminItems();
     });
   }
-
-  renderAdminItems();
 }
 
-function formatDateLabel(dateValue) {
-  const date = new Date(`${dateValue}T12:00:00`);
-  return date.toLocaleDateString("fr-FR", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
+function renderOfferProductList() {
+  const list = document.getElementById("offer-product-list");
+  if (!list) {
+    return;
+  }
+
+  const articles = getStoredItems().filter((item) => item.category !== "offres");
+  list.innerHTML = "";
+
+  if (articles.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-state small-empty";
+    empty.textContent = "Aucun produit créé pour le moment.";
+    list.appendChild(empty);
+    return;
+  }
+
+  articles.forEach((item) => {
+    const label = document.createElement("label");
+    label.className = "choice-row";
+
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.name = "existingProducts";
+    input.value = item.name;
+
+    const span = document.createElement("span");
+    span.textContent = `${item.name} - ${item.price}`;
+
+    label.append(input, span);
+    list.appendChild(label);
   });
 }
 
-function isOpenDay(dateValue) {
-  const date = new Date(`${dateValue}T12:00:00`);
-  return OPEN_DAYS.includes(date.getDay());
-}
-
-function renderBlockedSlots() {
-  const list = document.getElementById("blocked-list");
+function renderExclusiveProducts() {
+  const list = document.getElementById("exclusive-product-list");
   if (!list) {
-    updateAdminSummary();
     return;
   }
 
-  const slots = getBlockedSlots();
   list.innerHTML = "";
 
-  if (slots.length === 0) {
-    const empty = document.createElement("p");
-    empty.className = "empty-state";
-    empty.textContent = "Aucun créneau bloqué pour le moment.";
-    list.appendChild(empty);
-    updateAdminSummary();
-    return;
-  }
+  exclusiveProducts.forEach((product, index) => {
+    const item = document.createElement("div");
+    item.className = "exclusive-chip";
 
-  slots.forEach((slot, index) => {
-    const item = document.createElement("article");
-    item.className = "blocked-item";
-
-    const text = document.createElement("div");
-    const title = document.createElement("h3");
-    title.textContent = formatDateLabel(slot.date);
-
-    const details = document.createElement("p");
-    details.textContent = slot.type === "day" ? "Toute la soirée est bloquée" : `${slot.start} - ${slot.end}`;
+    const text = document.createElement("span");
+    text.textContent = product;
 
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "secondary-action";
     button.textContent = "Retirer";
     button.addEventListener("click", () => {
-      const nextSlots = getBlockedSlots().filter((_, itemIndex) => itemIndex !== index);
-      saveBlockedSlots(nextSlots);
-      renderBlockedSlots();
+      exclusiveProducts.splice(index, 1);
+      renderExclusiveProducts();
     });
 
-    text.append(title, details);
     item.append(text, button);
     list.appendChild(item);
   });
-
-  updateAdminSummary();
 }
 
-function initBlockedSlots() {
-  const form = document.getElementById("admin-block-form");
-  const typeSelect = document.getElementById("blocked-type");
-  const timeRow = document.getElementById("blocked-time-row");
-  const note = document.getElementById("schedule-note");
+function initOfferForm() {
+  const form = document.getElementById("admin-offer-form");
+  const addExclusiveButton = document.getElementById("add-exclusive-product");
+  const exclusiveInput = document.getElementById("exclusive-product-name");
 
   if (!form) {
     return;
   }
 
-  function updateTimeVisibility() {
-    if (timeRow && typeSelect) {
-      timeRow.hidden = typeSelect.value === "day";
-    }
-  }
-
-  typeSelect.addEventListener("change", updateTimeVisibility);
-  updateTimeVisibility();
-
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    const formData = new FormData(form);
-    const date = formData.get("date");
-    const type = formData.get("type");
-
-    if (!isOpenDay(date)) {
-      note.textContent = "Choisis un vendredi ou un samedi : Sithinem est ouvert uniquement ces deux soirs.";
-      note.classList.add("warning-note");
+  addExclusiveButton?.addEventListener("click", () => {
+    const value = exclusiveInput.value.trim();
+    if (!value) {
       return;
     }
 
-    const slot = {
-      date,
-      type,
-      start: formData.get("start"),
-      end: formData.get("end"),
-    };
-
-    const slots = getBlockedSlots();
-    slots.push(slot);
-    saveBlockedSlots(slots);
-
-    form.reset();
-    note.textContent = "Créneau bloqué. Ouverture normale : vendredi et samedi, de 18h30 à 22h30.";
-    note.classList.remove("warning-note");
-    updateTimeVisibility();
-    renderBlockedSlots();
+    exclusiveProducts.push(value);
+    exclusiveInput.value = "";
+    renderExclusiveProducts();
   });
 
-  renderBlockedSlots();
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    const selectedProducts = Array.from(form.querySelectorAll('input[name="existingProducts"]:checked')).map((input) => input.value);
+
+    const offer = {
+      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+      type: "offer",
+      name: formData.get("name").trim(),
+      category: "offres",
+      description: formData.get("description").trim(),
+      price: formData.get("price").trim(),
+      image: await fileToDataUrl(formData.get("image")),
+      offerProducts: selectedProducts,
+      exclusiveProducts: [...exclusiveProducts],
+    };
+
+    const items = getStoredItems();
+    items.push(offer);
+    saveStoredItems(items);
+    exclusiveProducts = [];
+    form.reset();
+    renderExclusiveProducts();
+    renderAdminItems();
+  });
+}
+
+function getStartOfWeek(date) {
+  const next = new Date(date);
+  const day = next.getDay() || 7;
+  next.setDate(next.getDate() - day + 1);
+  next.setHours(0, 0, 0, 0);
+  return next;
+}
+
+function addDays(date, days) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function formatDateValue(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function formatDateLabel(date) {
+  return date.toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+  });
+}
+
+function getSlotKey(dateValue, time) {
+  return `${dateValue}_${time}`;
+}
+
+function renderWeeklyCalendar() {
+  const calendar = document.getElementById("weekly-calendar");
+  const label = document.getElementById("week-label");
+
+  if (!calendar) {
+    updateAdminSummary();
+    return;
+  }
+
+  const friday = addDays(currentWeekStart, 4);
+  const saturday = addDays(currentWeekStart, 5);
+  const blockedSlots = getBlockedSlots();
+
+  if (label) {
+    label.textContent = `Semaine du ${currentWeekStart.toLocaleDateString("fr-FR")}`;
+  }
+
+  calendar.innerHTML = "";
+
+  [friday, saturday].forEach((date) => {
+    const dateValue = formatDateValue(date);
+    const day = document.createElement("section");
+    day.className = "calendar-day";
+
+    const title = document.createElement("h3");
+    title.textContent = formatDateLabel(date);
+
+    const slots = document.createElement("div");
+    slots.className = "slot-grid";
+
+    SLOT_TIMES.forEach((time) => {
+      const key = getSlotKey(dateValue, time);
+      const blocked = blockedSlots.includes(key);
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = blocked ? "slot-button is-blocked" : "slot-button";
+      button.textContent = time;
+      button.setAttribute("aria-pressed", String(blocked));
+      button.addEventListener("click", () => toggleBlockedSlot(key));
+      slots.appendChild(button);
+    });
+
+    day.append(title, slots);
+    calendar.appendChild(day);
+  });
+
+  updateAdminSummary();
+}
+
+function toggleBlockedSlot(key) {
+  const blockedSlots = getBlockedSlots();
+  const exists = blockedSlots.includes(key);
+  const nextSlots = exists ? blockedSlots.filter((slot) => slot !== key) : [...blockedSlots, key];
+  saveBlockedSlots(nextSlots);
+  renderWeeklyCalendar();
+}
+
+function initWeeklyCalendar() {
+  const previous = document.getElementById("previous-week");
+  const next = document.getElementById("next-week");
+
+  previous?.addEventListener("click", () => {
+    currentWeekStart = addDays(currentWeekStart, -7);
+    renderWeeklyCalendar();
+  });
+
+  next?.addEventListener("click", () => {
+    currentWeekStart = addDays(currentWeekStart, 7);
+    renderWeeklyCalendar();
+  });
+
+  renderWeeklyCalendar();
 }
 
 window.addEventListener("scroll", handleNavbarScroll);
 handleNavbarScroll();
 renderMenuItems();
 initAdminTabs();
-initAdminForm();
-initBlockedSlots();
+initProductForm();
+initOfferForm();
+renderAdminItems();
+renderOfferProductList();
+renderExclusiveProducts();
+initWeeklyCalendar();
 updateAdminSummary();

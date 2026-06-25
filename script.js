@@ -33,7 +33,7 @@ function writeJson(key, value) {
 }
 
 function getStoredItems() {
-  return readJson(STORAGE_KEY, []).map((item) => ({ visible: true, ...item }));
+  return readJson(STORAGE_KEY, []).map((item) => ({ visible: true, type: "article", ...item }));
 }
 
 function saveStoredItems(items) {
@@ -47,6 +47,10 @@ function getCategories() {
 
 function saveCategories(categories) {
   writeJson(CATEGORY_STORAGE_KEY, categories);
+}
+
+function hasCustomMenuData() {
+  return Boolean(localStorage.getItem(STORAGE_KEY) || localStorage.getItem(CATEGORY_STORAGE_KEY));
 }
 
 function getBlockedSlots() {
@@ -67,7 +71,8 @@ function slugify(value) {
 }
 
 function createId() {
-  return crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function fileToDataUrl(file) {
@@ -83,15 +88,11 @@ function fileToDataUrl(file) {
   });
 }
 
-function getCategoryLabel(categoryId) {
-  return getCategories().find((category) => category.id === categoryId)?.label || categoryId;
-}
-
 function createProductCard(item) {
   if (item.visible === false) return document.createDocumentFragment();
 
   const card = document.createElement("article");
-  card.className = item.category === "offres" ? "product-card product-offer" : "product-card";
+  card.className = item.type === "offer" || item.category === "offres" ? "product-card product-offer" : "product-card";
 
   if (item.image) {
     const image = document.createElement("img");
@@ -107,7 +108,6 @@ function createProductCard(item) {
   description.textContent = item.description;
   const price = document.createElement("strong");
   price.textContent = item.price;
-
   card.append(title, description);
 
   if (item.offerProducts?.length || item.exclusiveProducts?.length) {
@@ -126,11 +126,63 @@ function createProductCard(item) {
 }
 
 function renderMenuItems() {
+  if (document.querySelector(".menu-page") && hasCustomMenuData()) {
+    renderPublicManagedMenu();
+    return;
+  }
+
   getStoredItems().forEach((item) => {
     const list = document.querySelector(`[data-category-list="${item.category}"]`);
-    if (list && item.visible !== false) {
-      list.appendChild(createProductCard(item));
+    if (list && item.visible !== false) list.appendChild(createProductCard(item));
+  });
+}
+
+function renderPublicManagedMenu() {
+  const main = document.querySelector(".menu-page");
+  if (!main) return;
+
+  main.querySelectorAll(".category-tabs, .product-section").forEach((node) => node.remove());
+  const categories = getCategories();
+  const visibleItems = getStoredItems().filter((item) => item.visible !== false);
+  const tabs = document.createElement("nav");
+  tabs.className = "category-tabs";
+  tabs.setAttribute("aria-label", "Catégories de la carte");
+
+  categories.forEach((category) => {
+    const link = document.createElement("a");
+    link.href = `#${category.id}`;
+    link.textContent = category.label;
+    tabs.appendChild(link);
+  });
+  main.appendChild(tabs);
+
+  categories.forEach((category) => {
+    const section = document.createElement("section");
+    section.id = category.id;
+    section.className = "product-section";
+    const heading = document.createElement("div");
+    heading.className = "product-heading compact-heading";
+    const headingInner = document.createElement("div");
+    const title = document.createElement("h2");
+    title.textContent = category.label;
+    const subtitle = document.createElement("p");
+    subtitle.textContent = "Découvrez les produits disponibles à emporter.";
+    headingInner.append(title, subtitle);
+    heading.appendChild(headingInner);
+    const grid = document.createElement("div");
+    grid.className = "product-grid";
+    grid.dataset.categoryList = category.id;
+    const categoryItems = visibleItems.filter((item) => item.category === category.id);
+    if (categoryItems.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "empty-state";
+      empty.textContent = "Aucun produit disponible pour le moment.";
+      grid.appendChild(empty);
+    } else {
+      categoryItems.forEach((item) => grid.appendChild(createProductCard(item)));
     }
+    section.append(heading, grid);
+    main.appendChild(section);
   });
 }
 
@@ -142,18 +194,12 @@ function updateAdminSummary() {
 }
 
 function activateAdminTab(target) {
-  document.querySelectorAll("[data-admin-tab]").forEach((tab) => {
-    tab.classList.toggle("is-active", tab.dataset.adminTab === target);
-  });
-  document.querySelectorAll("[data-admin-panel]").forEach((panel) => {
-    panel.classList.toggle("is-active", panel.dataset.adminPanel === target);
-  });
+  document.querySelectorAll("[data-admin-tab]").forEach((tab) => tab.classList.toggle("is-active", tab.dataset.adminTab === target));
+  document.querySelectorAll("[data-admin-panel]").forEach((panel) => panel.classList.toggle("is-active", panel.dataset.adminPanel === target));
 }
 
 function initAdminTabs() {
-  document.querySelectorAll("[data-admin-tab]").forEach((tab) => {
-    tab.addEventListener("click", () => activateAdminTab(tab.dataset.adminTab));
-  });
+  document.querySelectorAll("[data-admin-tab]").forEach((tab) => tab.addEventListener("click", () => activateAdminTab(tab.dataset.adminTab)));
   document.querySelectorAll("[data-admin-open]").forEach((opener) => {
     opener.addEventListener("click", (event) => {
       event.preventDefault();
@@ -166,12 +212,8 @@ function initAdminTabs() {
 function renderMiniMenuTabs() {
   const tabs = document.getElementById("mini-menu-tabs");
   if (!tabs) return;
-
   const categories = getCategories();
-  if (!categories.some((category) => category.id === activeMenuCategory)) {
-    activeMenuCategory = categories[0]?.id || "woks";
-  }
-
+  if (!categories.some((category) => category.id === activeMenuCategory)) activeMenuCategory = categories[0]?.id || "woks";
   tabs.innerHTML = "";
   categories.forEach((category) => {
     const button = document.createElement("button");
@@ -192,10 +234,8 @@ function renderMiniMenu() {
   renderMiniMenuTabs();
   const grid = document.getElementById("mini-menu-grid");
   if (!grid) return;
-
   const items = getStoredItems().filter((item) => item.category === activeMenuCategory);
   grid.innerHTML = "";
-
   if (items.length === 0) {
     const empty = document.createElement("p");
     empty.className = "editor-empty";
@@ -203,21 +243,18 @@ function renderMiniMenu() {
     grid.appendChild(empty);
     return;
   }
-
   items.forEach((item) => {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "mini-menu-card";
     card.classList.toggle("is-selected", item.id === selectedMenuItemId);
     card.classList.toggle("is-hidden", item.visible === false);
-
     if (item.image) {
       const image = document.createElement("img");
       image.src = item.image;
       image.alt = item.name;
       card.appendChild(image);
     }
-
     const body = document.createElement("div");
     body.className = "mini-card-body";
     const title = document.createElement("h3");
@@ -246,41 +283,31 @@ function renderMiniMenu() {
 function renderEditor() {
   const editor = document.getElementById("admin-editor");
   if (!editor) return;
-
   const items = getStoredItems();
   const item = items.find((entry) => entry.id === selectedMenuItemId);
   const categories = getCategories();
-
   if (!item) {
     editor.innerHTML = `<h2>Détail</h2><p class="editor-empty">Clique sur un article ou une offre de la mini-carte pour modifier ses informations.</p>`;
     return;
   }
-
   editor.innerHTML = `
     <h2>${item.type === "offer" ? "Modifier l'offre" : "Modifier l'article"}</h2>
     <label for="edit-name">Nom</label>
     <input id="edit-name" type="text" value="${escapeAttribute(item.name || "")}" />
     <label for="edit-category">Onglet</label>
-    <select id="edit-category">
-      ${categories.map((category) => `<option value="${category.id}" ${category.id === item.category ? "selected" : ""}>${category.label}</option>`).join("")}
-    </select>
+    <select id="edit-category">${categories.map((category) => `<option value="${category.id}" ${category.id === item.category ? "selected" : ""}>${category.label}</option>`).join("")}</select>
     <label for="edit-description">Description</label>
     <textarea id="edit-description" rows="4">${escapeHtml(item.description || "")}</textarea>
     <label for="edit-price">Prix</label>
     <input id="edit-price" type="text" value="${escapeAttribute(item.price || "")}" />
     <label for="edit-image">Image</label>
     <input id="edit-image" type="file" accept="image/*" />
-    ${item.type === "offer" ? `
-      <label for="edit-offer-lines">Produits dans l'offre</label>
-      <textarea id="edit-offer-lines" rows="4">${escapeHtml([...(item.offerProducts || []), ...(item.exclusiveProducts || [])].join("\n"))}</textarea>
-    ` : ""}
+    ${item.type === "offer" ? `<label for="edit-offer-lines">Produits dans l'offre</label><textarea id="edit-offer-lines" rows="4">${escapeHtml([...(item.offerProducts || []), ...(item.exclusiveProducts || [])].join("\n"))}</textarea>` : ""}
     <div class="editor-actions">
       <button type="button" class="secondary-action" id="toggle-visible">${item.visible === false ? "Rendre visible" : "Masquer"}</button>
       <button type="button" class="danger-action" id="delete-item">Supprimer</button>
     </div>
-    <button type="button" class="primary-action" id="save-item">Enregistrer</button>
-  `;
-
+    <button type="button" class="primary-action" id="save-item">Enregistrer</button>`;
   document.getElementById("save-item").addEventListener("click", saveEditedItem);
   document.getElementById("toggle-visible").addEventListener("click", toggleEditedItemVisibility);
   document.getElementById("delete-item").addEventListener("click", deleteEditedItem);
@@ -298,7 +325,6 @@ async function saveEditedItem() {
   const items = getStoredItems();
   const index = items.findIndex((entry) => entry.id === selectedMenuItemId);
   if (index === -1) return;
-
   const image = await fileToDataUrl(document.getElementById("edit-image").files[0]);
   const nextCategory = document.getElementById("edit-category").value;
   items[index] = {
@@ -309,12 +335,10 @@ async function saveEditedItem() {
     price: document.getElementById("edit-price").value.trim(),
     image: image || items[index].image,
   };
-
   if (items[index].type === "offer") {
     items[index].offerProducts = document.getElementById("edit-offer-lines").value.split("\n").map((line) => line.trim()).filter(Boolean);
     items[index].exclusiveProducts = [];
   }
-
   saveStoredItems(items);
   activeMenuCategory = nextCategory;
   renderMiniMenu();
@@ -334,6 +358,7 @@ function toggleEditedItemVisibility() {
 }
 
 function deleteEditedItem() {
+  if (!confirm("Supprimer définitivement cet élément de la carte ?")) return;
   const items = getStoredItems().filter((entry) => entry.id !== selectedMenuItemId);
   selectedMenuItemId = null;
   saveStoredItems(items);
@@ -368,10 +393,15 @@ function createMenuItem(type) {
 
 function initMiniMenuAdmin() {
   if (!document.getElementById("mini-menu-grid")) return;
-
   document.getElementById("create-article")?.addEventListener("click", () => createMenuItem("article"));
   document.getElementById("create-offer")?.addEventListener("click", () => createMenuItem("offer"));
   document.getElementById("add-menu-tab")?.addEventListener("click", addMenuTab);
+  document.getElementById("new-menu-tab-name")?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      addMenuTab();
+    }
+  });
   document.getElementById("delete-menu-tab")?.addEventListener("click", deleteActiveMenuTab);
   renderMiniMenu();
   renderEditor();
@@ -380,13 +410,17 @@ function initMiniMenuAdmin() {
 function addMenuTab() {
   const input = document.getElementById("new-menu-tab-name");
   const label = input.value.trim();
-  if (!label) return;
+  if (!label) {
+    input.focus();
+    return;
+  }
   const categories = getCategories();
   let id = slugify(label);
   if (categories.some((category) => category.id === id)) id = `${id}-${Date.now()}`;
   categories.push({ id, label });
   saveCategories(categories);
   activeMenuCategory = id;
+  selectedMenuItemId = null;
   input.value = "";
   renderMiniMenu();
   renderEditor();
@@ -395,7 +429,9 @@ function addMenuTab() {
 function deleteActiveMenuTab() {
   const categories = getCategories();
   if (categories.length <= 1) return;
-  const nextCategories = categories.filter((category) => category.id !== activeMenuCategory);
+  const category = categories.find((entry) => entry.id === activeMenuCategory);
+  if (!confirm(`Supprimer l'onglet "${category?.label || activeMenuCategory}" et tous les produits dedans ?`)) return;
+  const nextCategories = categories.filter((entry) => entry.id !== activeMenuCategory);
   const items = getStoredItems().filter((item) => item.category !== activeMenuCategory);
   saveCategories(nextCategories);
   saveStoredItems(items);
@@ -439,13 +475,11 @@ function renderWeeklyCalendar() {
     updateAdminSummary();
     return;
   }
-
   const friday = addDays(currentWeekStart, 4);
   const saturday = addDays(currentWeekStart, 5);
   const blockedSlots = getBlockedSlots();
   if (label) label.textContent = `Semaine du ${currentWeekStart.toLocaleDateString("fr-FR")}`;
   calendar.innerHTML = "";
-
   [friday, saturday].forEach((date) => {
     const dateValue = formatDateValue(date);
     const day = document.createElement("section");
@@ -454,7 +488,6 @@ function renderWeeklyCalendar() {
     title.textContent = formatDateLabel(date);
     const slots = document.createElement("div");
     slots.className = "slot-grid";
-
     SLOT_TIMES.forEach((time) => {
       const key = getSlotKey(dateValue, time);
       const blocked = blockedSlots.includes(key);
@@ -466,7 +499,6 @@ function renderWeeklyCalendar() {
       button.addEventListener("click", () => toggleBlockedSlot(key));
       slots.appendChild(button);
     });
-
     day.append(title, slots);
     calendar.appendChild(day);
   });

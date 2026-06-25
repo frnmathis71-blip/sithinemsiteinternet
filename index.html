@@ -23,7 +23,7 @@
       <img src="logo.png" alt="Logo Sithinem" class="logo" />
     </a>
 
-    <nav class="nav-right">
+    <nav class="nav-right" style="z-index: 1005; pointer-events: auto;">
       <a href="menu.html" class="nav-link">Menu</a>
 
       <a href="connexion.html" class="nav-link nav-icon-link">
@@ -31,7 +31,7 @@
         <span>Se connecter</span>
       </a>
 
-      <a href="panier.html" class="nav-link nav-icon-link cart-link" onclick="window.location.href='panier.html'; return false;">
+      <a href="panier.html" class="nav-link nav-icon-link cart-link" style="position: relative; z-index: 1006; pointer-events: auto;">
         <img src="panier.jpg" alt="" class="nav-icon-img" width="34" height="34" />
         <span>Panier</span>
         <span class="cart-count" data-cart-count hidden>0</span>
@@ -109,6 +109,6 @@
   </main>
 
   <script src="script.js"></script>
-  <script src="cart.js?v=20260625-home-cart-click-fix"></script>
+  <script src="cart.js?v=20260625-home-cart-click-fix2"></script>
 </body>
 </html>

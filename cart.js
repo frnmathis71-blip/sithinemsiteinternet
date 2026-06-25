@@ -1,6 +1,7 @@
 (function () {
   const CART_KEY = "sithinemCart";
   const ORDERS_KEY = "sithinemOrders";
+  const ARCHIVE_KEY = "sithinemArchivedOrders";
   const BLOCKED_KEY = "sithinemBlockedSlots";
   const SLOT_TIMES = ["18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00"];
 
@@ -19,7 +20,7 @@
     const style = document.createElement("style");
     style.id = "cart-feature-styles";
     style.textContent = `
-      .cart-link{position:relative}.cart-count{position:absolute;top:-8px;right:-12px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--green);color:var(--white);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}.cart-add-button{width:100%;margin-top:18px}.cart-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:28px;max-width:1120px;margin:0 auto;align-items:start}.cart-panel,.checkout-panel,.order-success,.order-admin-card{background:var(--white);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow)}.cart-panel,.checkout-panel,.order-success,.order-admin-card{padding:24px}.cart-list,.checkout-form,.customer-fields,.admin-order-list{display:grid;gap:16px}.cart-item{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:18px 0;border-bottom:1px solid var(--border)}.cart-item:last-child{border-bottom:0}.cart-item p,.admin-order-message p{color:var(--muted);line-height:1.5}.cart-item-actions{display:flex;align-items:center;gap:10px}.quantity-button,.remove-button{border:0;border-radius:6px;font:inherit;font-weight:800;cursor:pointer}.quantity-button{width:34px;height:34px;background:var(--green-soft);color:var(--green-dark)}.remove-button{min-height:34px;padding:0 12px;background:#ffe8e2;color:#963213}.cart-total-row{display:flex;justify-content:space-between;margin-top:18px;padding-top:18px;border-top:1px solid var(--border);color:var(--green-dark);font-size:22px;font-weight:800}.checkout-form label{color:var(--green-dark);font-weight:800}.checkout-form input,.checkout-form select,.checkout-form textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:13px 14px;color:var(--text);font:inherit;background:var(--white)}.connected-customer-note,.order-success,.admin-order-message{color:var(--green-dark);background:var(--green-soft);line-height:1.5}.order-admin-header{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:16px}.admin-order-items{display:grid;gap:8px;margin:16px 0;padding-left:18px;color:var(--muted)}.admin-order-total{display:block;color:var(--green-dark);margin-top:14px}.admin-sync-note{margin-bottom:16px;padding:14px 16px;border-radius:8px;background:var(--green-soft);color:var(--green-dark);line-height:1.5}.admin-order-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}.admin-status-action{min-height:40px;padding:0 18px;border:0;border-radius:6px;font:inherit;font-weight:800;cursor:pointer}.admin-status-action:disabled{opacity:.5;cursor:not-allowed}.admin-status-refuse{background:#fff3d6;color:#805500}.admin-status-cancel{background:#ffe8e2;color:#963213}.status-pill.is-validated{background:#dff5e9;color:#04613f}.status-pill.is-refused,.status-pill.is-cancelled{background:#ffe8e2;color:#963213}@media(max-width:900px){.cart-layout,.cart-item{grid-template-columns:1fr}.cart-item-actions,.admin-order-actions{justify-content:flex-start}}
+      .cart-link{position:relative}.cart-count{position:absolute;top:-8px;right:-12px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--green);color:var(--white);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}.cart-add-button{width:100%;margin-top:18px}.cart-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:28px;max-width:1120px;margin:0 auto;align-items:start}.cart-panel,.checkout-panel,.order-success,.order-admin-card,.archive-day-card{background:var(--white);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow)}.cart-panel,.checkout-panel,.order-success,.order-admin-card,.archive-day-card{padding:24px}.cart-list,.checkout-form,.customer-fields,.admin-order-list,.admin-archive-list{display:grid;gap:16px}.cart-item{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:18px 0;border-bottom:1px solid var(--border)}.cart-item:last-child{border-bottom:0}.cart-item p,.admin-order-message p{color:var(--muted);line-height:1.5}.cart-item-actions{display:flex;align-items:center;gap:10px}.quantity-button,.remove-button{border:0;border-radius:6px;font:inherit;font-weight:800;cursor:pointer}.quantity-button{width:34px;height:34px;background:var(--green-soft);color:var(--green-dark)}.remove-button{min-height:34px;padding:0 12px;background:#ffe8e2;color:#963213}.cart-total-row{display:flex;justify-content:space-between;margin-top:18px;padding-top:18px;border-top:1px solid var(--border);color:var(--green-dark);font-size:22px;font-weight:800}.checkout-form label{color:var(--green-dark);font-weight:800}.checkout-form input,.checkout-form select,.checkout-form textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:13px 14px;color:var(--text);font:inherit;background:var(--white)}.connected-customer-note,.order-success,.admin-order-message{color:var(--green-dark);background:var(--green-soft);line-height:1.5}.order-admin-header{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:16px}.admin-order-items{display:grid;gap:8px;margin:16px 0;padding-left:18px;color:var(--muted)}.admin-order-total{display:block;color:var(--green-dark);margin-top:14px}.admin-sync-note{margin-bottom:16px;padding:14px 16px;border-radius:8px;background:var(--green-soft);color:var(--green-dark);line-height:1.5}.admin-order-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}.admin-status-action{min-height:40px;padding:0 18px;border:0;border-radius:6px;font:inherit;font-weight:800;cursor:pointer}.admin-status-action:disabled{opacity:.5;cursor:not-allowed}.admin-status-prepare{background:var(--green-soft);color:var(--green-dark)}.admin-status-ready{background:#e6f1ff;color:#164d86}.admin-status-finish{background:#efe8ff;color:#4e2f83}.admin-status-refuse{background:#fff3d6;color:#805500}.admin-status-cancel{background:#ffe8e2;color:#963213}.admin-status-archive{background:var(--text);color:var(--white)}.status-pill.is-validated{background:#dff5e9;color:#04613f}.status-pill.is-preparing{background:var(--green-soft);color:var(--green-dark)}.status-pill.is-ready{background:#e6f1ff;color:#164d86}.status-pill.is-finished{background:#efe8ff;color:#4e2f83}.status-pill.is-refused,.status-pill.is-cancelled{background:#ffe8e2;color:#963213}.archive-day-card h3{color:var(--green-dark);margin-bottom:16px;text-transform:capitalize}.archive-order{padding:16px 0;border-top:1px solid var(--border)}.archive-order:first-of-type{border-top:0}.archive-order-header{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:10px}.archive-order p{color:var(--muted);line-height:1.5}@media(max-width:900px){.cart-layout,.cart-item{grid-template-columns:1fr}.cart-item-actions,.admin-order-actions{justify-content:flex-start}.archive-order-header,.order-admin-header{flex-direction:column}}
     `;
     document.head.appendChild(style);
   }
@@ -27,9 +28,14 @@
   const getCart = () => readJson(CART_KEY, []);
   const saveCart = (cart) => { writeJson(CART_KEY, cart); updateCartCount(); };
   const getOrders = () => readJson(ORDERS_KEY, []);
+  const getArchivedOrders = () => readJson(ARCHIVE_KEY, []);
   const saveOrders = (orders) => {
     writeJson(ORDERS_KEY, orders);
     window.dispatchEvent(new CustomEvent("sithinem:orders-updated"));
+  };
+  const saveArchivedOrders = (orders) => {
+    writeJson(ARCHIVE_KEY, orders);
+    window.dispatchEvent(new CustomEvent("sithinem:archives-updated"));
   };
   const getTotal = (cart = getCart()) => cart.reduce((total, item) => total + (item.priceValue || 0) * (item.quantity || 0), 0);
 
@@ -186,8 +192,21 @@
     return `${date.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" })} à ${time}`;
   }
 
+  function getOrderDayKey(order) {
+    const pickupDate = String(order.pickupSlot || "").split("_")[0];
+    if (/^\d{4}-\d{2}-\d{2}$/.test(pickupDate)) return pickupDate;
+    return String(order.createdAt || order.archivedAt || new Date().toISOString()).slice(0, 10);
+  }
+
+  function formatDayLabel(dayKey) {
+    return new Date(`${dayKey}T00:00:00`).toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+  }
+
   function getStatusClass(status) {
     if (status === "Validée") return "is-validated";
+    if (status === "En préparation") return "is-preparing";
+    if (status === "Prête à récupérer") return "is-ready";
+    if (status === "Terminée") return "is-finished";
     if (status === "Refusée") return "is-refused";
     if (status === "Annulée") return "is-cancelled";
     return "";
@@ -203,6 +222,17 @@
     renderAdminOrders();
   }
 
+  function archiveOrder(orderId) {
+    const orders = getOrders();
+    const order = orders.find((entry) => entry.id === orderId);
+    if (!order) return;
+    const archivedOrder = { ...order, archivedAt: new Date().toISOString() };
+    saveOrders(orders.filter((entry) => entry.id !== orderId));
+    saveArchivedOrders([archivedOrder, ...getArchivedOrders()]);
+    renderAdminOrders();
+    renderArchivedOrders();
+  }
+
   function renderAdminOrders() {
     const list = document.getElementById("admin-orders-list");
     const orders = getOrders();
@@ -210,10 +240,10 @@
     if (count) count.textContent = orders.length;
     if (!list) return;
     if (!orders.length) {
-      list.innerHTML = '<div class="orders-empty"><h3>Aucune commande pour le moment</h3><p>Quand un client validera son panier, sa commande s\'affichera ici avec le créneau, les coordonnées, le message et le total.</p></div>';
+      list.innerHTML = '<div class="orders-empty"><h3>Aucune commande active</h3><p>Les commandes archivées sont disponibles dans l\'onglet Archives. Les nouvelles commandes validées depuis le panier apparaîtront ici.</p></div>';
       return;
     }
-    list.innerHTML = `<p class="admin-sync-note">${orders.length} commande${orders.length > 1 ? "s" : ""} enregistrée${orders.length > 1 ? "s" : ""}. Clique sur Valider, Refuser ou Annuler pour changer le statut d'une commande.</p>` + orders.map((order) => {
+    list.innerHTML = `<p class="admin-sync-note">${orders.length} commande${orders.length > 1 ? "s" : ""} active${orders.length > 1 ? "s" : ""}. Change le statut pendant le service, puis archive la commande quand elle est terminée ou traitée.</p>` + orders.map((order) => {
       const customer = order.customer || {};
       const status = order.status || "Nouvelle commande";
       const customerName = [customer.firstName, customer.lastName].filter(Boolean).join(" ") || customer.email || "Client connecté";
@@ -222,10 +252,46 @@
       const updatedAt = order.statusUpdatedAt ? `<p class="form-note">Statut mis à jour le ${new Date(order.statusUpdatedAt).toLocaleString("fr-FR")}</p>` : "";
       const actions = `<div class="admin-order-actions">
         <button type="button" class="primary-action admin-status-action" data-order-id="${escapeHtml(order.id)}" data-order-status="Validée" ${status === "Validée" ? "disabled" : ""}>Valider</button>
+        <button type="button" class="admin-status-action admin-status-prepare" data-order-id="${escapeHtml(order.id)}" data-order-status="En préparation" ${status === "En préparation" ? "disabled" : ""}>Préparer</button>
+        <button type="button" class="admin-status-action admin-status-ready" data-order-id="${escapeHtml(order.id)}" data-order-status="Prête à récupérer" ${status === "Prête à récupérer" ? "disabled" : ""}>Prête</button>
+        <button type="button" class="admin-status-action admin-status-finish" data-order-id="${escapeHtml(order.id)}" data-order-status="Terminée" ${status === "Terminée" ? "disabled" : ""}>Terminée</button>
         <button type="button" class="admin-status-action admin-status-refuse" data-order-id="${escapeHtml(order.id)}" data-order-status="Refusée" ${status === "Refusée" ? "disabled" : ""}>Refuser</button>
         <button type="button" class="admin-status-action admin-status-cancel" data-order-id="${escapeHtml(order.id)}" data-order-status="Annulée" ${status === "Annulée" ? "disabled" : ""}>Annuler</button>
+        <button type="button" class="admin-status-action admin-status-archive" data-order-id="${escapeHtml(order.id)}" data-order-archive="true">Archiver</button>
       </div>`;
       return `<article class="order-admin-card"><div class="order-admin-header"><div><p class="eyebrow">${escapeHtml(order.id)}</p><h3>${escapeHtml(customerName)}</h3></div><span class="status-pill ${getStatusClass(status)}">${escapeHtml(status)}</span></div><p><strong>Créneau :</strong> ${escapeHtml(formatPickup(order.pickupSlot))}</p><p><strong>Téléphone :</strong> ${escapeHtml(customer.phone || "Non renseigné")}</p><ul class="admin-order-items">${items}</ul>${message}<strong class="admin-order-total">Total : ${formatPrice(order.total || 0)}</strong>${updatedAt}${actions}</article>`;
+    }).join("");
+  }
+
+  function renderArchivedOrders() {
+    const list = document.getElementById("admin-archive-list");
+    if (!list) return;
+    const archivedOrders = getArchivedOrders();
+    const count = document.getElementById("summary-archives-count");
+    if (count) count.textContent = archivedOrders.length;
+    if (!archivedOrders.length) {
+      list.innerHTML = '<div class="orders-empty"><h3>Aucune archive</h3><p>Quand tu cliqueras sur Archiver sur une commande, elle disparaîtra de l\'onglet Commandes et sera rangée ici par jour.</p></div>';
+      return;
+    }
+
+    const groups = archivedOrders.reduce((acc, order) => {
+      const dayKey = getOrderDayKey(order);
+      if (!acc[dayKey]) acc[dayKey] = [];
+      acc[dayKey].push(order);
+      return acc;
+    }, {});
+
+    const dayKeys = Object.keys(groups).sort((a, b) => b.localeCompare(a));
+    list.innerHTML = dayKeys.map((dayKey) => {
+      const orders = groups[dayKey].sort((a, b) => String(b.archivedAt || b.createdAt).localeCompare(String(a.archivedAt || a.createdAt)));
+      const total = orders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+      const ordersHtml = orders.map((order) => {
+        const customer = order.customer || {};
+        const customerName = [customer.firstName, customer.lastName].filter(Boolean).join(" ") || customer.email || "Client connecté";
+        const itemSummary = (order.items || []).map((item) => `${item.quantity} × ${item.name}`).join(", ");
+        return `<article class="archive-order"><div class="archive-order-header"><div><p class="eyebrow">${escapeHtml(order.id)}</p><h4>${escapeHtml(customerName)}</h4></div><span class="status-pill ${getStatusClass(order.status || "")}">${escapeHtml(order.status || "Archivée")}</span></div><p><strong>Créneau :</strong> ${escapeHtml(formatPickup(order.pickupSlot))}</p><p><strong>Commande :</strong> ${escapeHtml(itemSummary || "Aucun détail")}</p><p><strong>Total :</strong> ${formatPrice(order.total || 0)}</p><p><strong>Archivée le :</strong> ${new Date(order.archivedAt || order.createdAt).toLocaleString("fr-FR")}</p></article>`;
+      }).join("");
+      return `<section class="archive-day-card"><h3>${escapeHtml(formatDayLabel(dayKey))}</h3><p class="form-note">${orders.length} commande${orders.length > 1 ? "s" : ""} — total ${formatPrice(total)}</p>${ordersHtml}</section>`;
     }).join("");
   }
 
@@ -233,6 +299,7 @@
     updateCartCount();
     initMenuButtons();
     renderAdminOrders();
+    renderArchivedOrders();
   }
 
   function watchMenuCards() {
@@ -248,6 +315,13 @@
     if (!list || list.dataset.actionsReady === "true") return;
     list.dataset.actionsReady = "true";
     list.addEventListener("click", (event) => {
+      const archiveButton = event.target.closest("[data-order-archive]");
+      if (archiveButton) {
+        const orderId = archiveButton.dataset.orderId;
+        if (orderId && confirm("Archiver cette commande ? Elle sera retirée des commandes actives et rangée dans Archives.")) archiveOrder(orderId);
+        return;
+      }
+
       const button = event.target.closest("[data-order-status]");
       if (!button) return;
       const orderId = button.dataset.orderId;
@@ -262,13 +336,14 @@
     if (!document.getElementById("admin-orders-list")) return;
     initOrderActions();
     document.querySelectorAll("[data-admin-tab], [data-admin-open]").forEach((button) => {
-      button.addEventListener("click", () => setTimeout(renderAdminOrders, 50));
+      button.addEventListener("click", () => setTimeout(refreshCartFeatures, 50));
     });
     window.addEventListener("storage", (event) => {
-      if (event.key === ORDERS_KEY) renderAdminOrders();
+      if (event.key === ORDERS_KEY || event.key === ARCHIVE_KEY) refreshCartFeatures();
     });
-    window.addEventListener("sithinem:orders-updated", renderAdminOrders);
-    setInterval(renderAdminOrders, 2000);
+    window.addEventListener("sithinem:orders-updated", refreshCartFeatures);
+    window.addEventListener("sithinem:archives-updated", refreshCartFeatures);
+    setInterval(refreshCartFeatures, 2000);
   }
 
   function init() {

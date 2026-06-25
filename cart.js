@@ -19,7 +19,7 @@
     const style = document.createElement("style");
     style.id = "cart-feature-styles";
     style.textContent = `
-      .cart-link{position:relative}.cart-count{position:absolute;top:-8px;right:-12px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--green);color:var(--white);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}.cart-add-button{width:100%;margin-top:18px}.cart-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:28px;max-width:1120px;margin:0 auto;align-items:start}.cart-panel,.checkout-panel,.order-success,.order-admin-card{background:var(--white);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow)}.cart-panel,.checkout-panel,.order-success,.order-admin-card{padding:24px}.cart-list,.checkout-form,.customer-fields,.admin-order-list{display:grid;gap:16px}.cart-item{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:18px 0;border-bottom:1px solid var(--border)}.cart-item:last-child{border-bottom:0}.cart-item p,.admin-order-message p{color:var(--muted);line-height:1.5}.cart-item-actions{display:flex;align-items:center;gap:10px}.quantity-button,.remove-button{border:0;border-radius:6px;font:inherit;font-weight:800;cursor:pointer}.quantity-button{width:34px;height:34px;background:var(--green-soft);color:var(--green-dark)}.remove-button{min-height:34px;padding:0 12px;background:#ffe8e2;color:#963213}.cart-total-row{display:flex;justify-content:space-between;margin-top:18px;padding-top:18px;border-top:1px solid var(--border);color:var(--green-dark);font-size:22px;font-weight:800}.checkout-form label{color:var(--green-dark);font-weight:800}.checkout-form input,.checkout-form select,.checkout-form textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:13px 14px;color:var(--text);font:inherit;background:var(--white)}.connected-customer-note,.order-success,.admin-order-message{color:var(--green-dark);background:var(--green-soft);line-height:1.5}.order-admin-header{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:16px}.admin-order-items{display:grid;gap:8px;margin:16px 0;padding-left:18px;color:var(--muted)}.admin-order-total{color:var(--green-dark)}.admin-sync-note{margin-bottom:16px;padding:14px 16px;border-radius:8px;background:var(--green-soft);color:var(--green-dark);line-height:1.5}@media(max-width:900px){.cart-layout,.cart-item{grid-template-columns:1fr}.cart-item-actions{justify-content:flex-start}}
+      .cart-link{position:relative}.cart-count{position:absolute;top:-8px;right:-12px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--green);color:var(--white);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}.cart-add-button{width:100%;margin-top:18px}.cart-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:28px;max-width:1120px;margin:0 auto;align-items:start}.cart-panel,.checkout-panel,.order-success,.order-admin-card{background:var(--white);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow)}.cart-panel,.checkout-panel,.order-success,.order-admin-card{padding:24px}.cart-list,.checkout-form,.customer-fields,.admin-order-list{display:grid;gap:16px}.cart-item{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:18px 0;border-bottom:1px solid var(--border)}.cart-item:last-child{border-bottom:0}.cart-item p,.admin-order-message p{color:var(--muted);line-height:1.5}.cart-item-actions{display:flex;align-items:center;gap:10px}.quantity-button,.remove-button{border:0;border-radius:6px;font:inherit;font-weight:800;cursor:pointer}.quantity-button{width:34px;height:34px;background:var(--green-soft);color:var(--green-dark)}.remove-button{min-height:34px;padding:0 12px;background:#ffe8e2;color:#963213}.cart-total-row{display:flex;justify-content:space-between;margin-top:18px;padding-top:18px;border-top:1px solid var(--border);color:var(--green-dark);font-size:22px;font-weight:800}.checkout-form label{color:var(--green-dark);font-weight:800}.checkout-form input,.checkout-form select,.checkout-form textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:13px 14px;color:var(--text);font:inherit;background:var(--white)}.connected-customer-note,.order-success,.admin-order-message{color:var(--green-dark);background:var(--green-soft);line-height:1.5}.order-admin-header{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:16px}.admin-order-items{display:grid;gap:8px;margin:16px 0;padding-left:18px;color:var(--muted)}.admin-order-total{display:block;color:var(--green-dark);margin-top:14px}.admin-sync-note{margin-bottom:16px;padding:14px 16px;border-radius:8px;background:var(--green-soft);color:var(--green-dark);line-height:1.5}.admin-order-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}.admin-status-action{min-height:40px;padding:0 18px;border:0;border-radius:6px;font:inherit;font-weight:800;cursor:pointer}.admin-status-action:disabled{opacity:.5;cursor:not-allowed}.admin-status-refuse{background:#fff3d6;color:#805500}.admin-status-cancel{background:#ffe8e2;color:#963213}.status-pill.is-validated{background:#dff5e9;color:#04613f}.status-pill.is-refused,.status-pill.is-cancelled{background:#ffe8e2;color:#963213}@media(max-width:900px){.cart-layout,.cart-item{grid-template-columns:1fr}.cart-item-actions,.admin-order-actions{justify-content:flex-start}}
     `;
     document.head.appendChild(style);
   }
@@ -186,6 +186,23 @@
     return `${date.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" })} à ${time}`;
   }
 
+  function getStatusClass(status) {
+    if (status === "Validée") return "is-validated";
+    if (status === "Refusée") return "is-refused";
+    if (status === "Annulée") return "is-cancelled";
+    return "";
+  }
+
+  function updateOrderStatus(orderId, nextStatus) {
+    const orders = getOrders();
+    const updatedOrders = orders.map((order) => {
+      if (order.id !== orderId) return order;
+      return { ...order, status: nextStatus, statusUpdatedAt: new Date().toISOString() };
+    });
+    saveOrders(updatedOrders);
+    renderAdminOrders();
+  }
+
   function renderAdminOrders() {
     const list = document.getElementById("admin-orders-list");
     const orders = getOrders();
@@ -196,12 +213,19 @@
       list.innerHTML = '<div class="orders-empty"><h3>Aucune commande pour le moment</h3><p>Quand un client validera son panier, sa commande s\'affichera ici avec le créneau, les coordonnées, le message et le total.</p></div>';
       return;
     }
-    list.innerHTML = `<p class="admin-sync-note">${orders.length} commande${orders.length > 1 ? "s" : ""} enregistrée${orders.length > 1 ? "s" : ""}. Les nouvelles commandes apparaissent automatiquement dans cet onglet.</p>` + orders.map((order) => {
+    list.innerHTML = `<p class="admin-sync-note">${orders.length} commande${orders.length > 1 ? "s" : ""} enregistrée${orders.length > 1 ? "s" : ""}. Clique sur Valider, Refuser ou Annuler pour changer le statut d'une commande.</p>` + orders.map((order) => {
       const customer = order.customer || {};
+      const status = order.status || "Nouvelle commande";
       const customerName = [customer.firstName, customer.lastName].filter(Boolean).join(" ") || customer.email || "Client connecté";
       const items = (order.items || []).map((item) => `<li>${escapeHtml(item.quantity)} × ${escapeHtml(item.name)} — ${formatPrice((item.priceValue || 0) * (item.quantity || 0))}</li>`).join("");
       const message = order.message ? `<div class="admin-order-message"><strong>Message client</strong><p>${escapeHtml(order.message)}</p></div>` : '<p class="form-note">Aucun message client.</p>';
-      return `<article class="order-admin-card"><div class="order-admin-header"><div><p class="eyebrow">${escapeHtml(order.id)}</p><h3>${escapeHtml(customerName)}</h3></div><span class="status-pill">${escapeHtml(order.status || "Nouvelle")}</span></div><p><strong>Créneau :</strong> ${escapeHtml(formatPickup(order.pickupSlot))}</p><p><strong>Téléphone :</strong> ${escapeHtml(customer.phone || "Non renseigné")}</p><ul class="admin-order-items">${items}</ul>${message}<strong class="admin-order-total">Total : ${formatPrice(order.total || 0)}</strong></article>`;
+      const updatedAt = order.statusUpdatedAt ? `<p class="form-note">Statut mis à jour le ${new Date(order.statusUpdatedAt).toLocaleString("fr-FR")}</p>` : "";
+      const actions = `<div class="admin-order-actions">
+        <button type="button" class="primary-action admin-status-action" data-order-id="${escapeHtml(order.id)}" data-order-status="Validée" ${status === "Validée" ? "disabled" : ""}>Valider</button>
+        <button type="button" class="admin-status-action admin-status-refuse" data-order-id="${escapeHtml(order.id)}" data-order-status="Refusée" ${status === "Refusée" ? "disabled" : ""}>Refuser</button>
+        <button type="button" class="admin-status-action admin-status-cancel" data-order-id="${escapeHtml(order.id)}" data-order-status="Annulée" ${status === "Annulée" ? "disabled" : ""}>Annuler</button>
+      </div>`;
+      return `<article class="order-admin-card"><div class="order-admin-header"><div><p class="eyebrow">${escapeHtml(order.id)}</p><h3>${escapeHtml(customerName)}</h3></div><span class="status-pill ${getStatusClass(status)}">${escapeHtml(status)}</span></div><p><strong>Créneau :</strong> ${escapeHtml(formatPickup(order.pickupSlot))}</p><p><strong>Téléphone :</strong> ${escapeHtml(customer.phone || "Non renseigné")}</p><ul class="admin-order-items">${items}</ul>${message}<strong class="admin-order-total">Total : ${formatPrice(order.total || 0)}</strong>${updatedAt}${actions}</article>`;
     }).join("");
   }
 
@@ -219,8 +243,24 @@
     observer.observe(menuPage, { childList: true, subtree: true });
   }
 
+  function initOrderActions() {
+    const list = document.getElementById("admin-orders-list");
+    if (!list || list.dataset.actionsReady === "true") return;
+    list.dataset.actionsReady = "true";
+    list.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-order-status]");
+      if (!button) return;
+      const orderId = button.dataset.orderId;
+      const nextStatus = button.dataset.orderStatus;
+      if (!orderId || !nextStatus) return;
+      if ((nextStatus === "Refusée" || nextStatus === "Annulée") && !confirm(`Confirmer le statut : ${nextStatus} ?`)) return;
+      updateOrderStatus(orderId, nextStatus);
+    });
+  }
+
   function watchAdminOrders() {
     if (!document.getElementById("admin-orders-list")) return;
+    initOrderActions();
     document.querySelectorAll("[data-admin-tab], [data-admin-open]").forEach((button) => {
       button.addEventListener("click", () => setTimeout(renderAdminOrders, 50));
     });

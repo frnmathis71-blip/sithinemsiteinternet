@@ -297,6 +297,7 @@
     <nav class="admin-tabs" aria-label="Navigation administration">
       <button type="button" class="admin-tab is-active" data-admin-tab="summary">Résumé</button>
       <button type="button" class="admin-tab" data-admin-tab="orders">Commandes</button>
+      <button type="button" class="admin-tab" data-admin-tab="archives">Archives</button>
       <button type="button" class="admin-tab" data-admin-tab="schedule">Créneaux</button>
       <button type="button" class="admin-tab" data-admin-tab="menu">Carte</button>
     </nav>
@@ -304,9 +305,14 @@
     <section class="admin-panel is-active" id="admin-summary" data-admin-panel="summary">
       <div class="dashboard-grid">
         <article class="metric-card">
-          <span>Commandes enregistrées</span>
+          <span>Commandes actives</span>
           <strong id="summary-orders-count">0</strong>
-          <p>Commandes à emporter validées depuis le panier.</p>
+          <p>Commandes en cours de traitement.</p>
+        </article>
+        <article class="metric-card">
+          <span>Archives</span>
+          <strong id="summary-archives-count">0</strong>
+          <p>Commandes traitées et classées par jour.</p>
         </article>
         <article class="metric-card">
           <span>Articles visibles</span>
@@ -342,6 +348,19 @@
           <span class="status-pill">Panier</span>
         </div>
         <div class="admin-order-list" id="admin-orders-list"></div>
+      </section>
+    </section>
+
+    <section class="admin-panel" id="admin-archives" data-admin-panel="archives">
+      <section class="admin-card-soft">
+        <div class="admin-preview-header">
+          <div>
+            <p class="eyebrow">Historique</p>
+            <h2>Archives des commandes</h2>
+          </div>
+          <span class="status-pill">Par jour</span>
+        </div>
+        <div class="admin-archive-list" id="admin-archive-list"></div>
       </section>
     </section>
 
@@ -402,6 +421,6 @@
   </main>
 
   <script src="script.js?v=20260625-menu-sync"></script>
-  <script src="cart.js?v=20260625-restaurant-ready"></script>
+  <script src="cart.js?v=20260625-order-archives"></script>
 </body>
 </html>

@@ -19,7 +19,7 @@
     const style = document.createElement("style");
     style.id = "cart-feature-styles";
     style.textContent = `
-      .cart-link{position:relative}.cart-count{position:absolute;top:-8px;right:-12px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--green);color:var(--white);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}.cart-add-button{width:100%;margin-top:18px}.cart-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:28px;max-width:1120px;margin:0 auto;align-items:start}.cart-panel,.checkout-panel,.order-success,.order-admin-card{background:var(--white);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow)}.cart-panel,.checkout-panel,.order-success,.order-admin-card{padding:24px}.cart-list,.checkout-form,.customer-fields,.admin-order-list{display:grid;gap:16px}.cart-item{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:18px 0;border-bottom:1px solid var(--border)}.cart-item:last-child{border-bottom:0}.cart-item p,.admin-order-message p{color:var(--muted);line-height:1.5}.cart-item-actions{display:flex;align-items:center;gap:10px}.quantity-button,.remove-button{border:0;border-radius:6px;font:inherit;font-weight:800;cursor:pointer}.quantity-button{width:34px;height:34px;background:var(--green-soft);color:var(--green-dark)}.remove-button{min-height:34px;padding:0 12px;background:#ffe8e2;color:#963213}.cart-total-row{display:flex;justify-content:space-between;margin-top:18px;padding-top:18px;border-top:1px solid var(--border);color:var(--green-dark);font-size:22px;font-weight:800}.checkout-form label{color:var(--green-dark);font-weight:800}.checkout-form input,.checkout-form select,.checkout-form textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:13px 14px;color:var(--text);font:inherit;background:var(--white)}.connected-customer-note,.order-success,.admin-order-message{color:var(--green-dark);background:var(--green-soft);line-height:1.5}.order-admin-header{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:16px}.admin-order-items{display:grid;gap:8px;margin:16px 0;padding-left:18px;color:var(--muted)}.admin-order-total{color:var(--green-dark)}@media(max-width:900px){.cart-layout,.cart-item{grid-template-columns:1fr}.cart-item-actions{justify-content:flex-start}}
+      .cart-link{position:relative}.cart-count{position:absolute;top:-8px;right:-12px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--green);color:var(--white);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}.cart-add-button{width:100%;margin-top:18px}.cart-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:28px;max-width:1120px;margin:0 auto;align-items:start}.cart-panel,.checkout-panel,.order-success,.order-admin-card{background:var(--white);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow)}.cart-panel,.checkout-panel,.order-success,.order-admin-card{padding:24px}.cart-list,.checkout-form,.customer-fields,.admin-order-list{display:grid;gap:16px}.cart-item{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:18px 0;border-bottom:1px solid var(--border)}.cart-item:last-child{border-bottom:0}.cart-item p,.admin-order-message p{color:var(--muted);line-height:1.5}.cart-item-actions{display:flex;align-items:center;gap:10px}.quantity-button,.remove-button{border:0;border-radius:6px;font:inherit;font-weight:800;cursor:pointer}.quantity-button{width:34px;height:34px;background:var(--green-soft);color:var(--green-dark)}.remove-button{min-height:34px;padding:0 12px;background:#ffe8e2;color:#963213}.cart-total-row{display:flex;justify-content:space-between;margin-top:18px;padding-top:18px;border-top:1px solid var(--border);color:var(--green-dark);font-size:22px;font-weight:800}.checkout-form label{color:var(--green-dark);font-weight:800}.checkout-form input,.checkout-form select,.checkout-form textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:13px 14px;color:var(--text);font:inherit;background:var(--white)}.connected-customer-note,.order-success,.admin-order-message{color:var(--green-dark);background:var(--green-soft);line-height:1.5}.order-admin-header{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:16px}.admin-order-items{display:grid;gap:8px;margin:16px 0;padding-left:18px;color:var(--muted)}.admin-order-total{color:var(--green-dark)}.admin-sync-note{margin-bottom:16px;padding:14px 16px;border-radius:8px;background:var(--green-soft);color:var(--green-dark);line-height:1.5}@media(max-width:900px){.cart-layout,.cart-item{grid-template-columns:1fr}.cart-item-actions{justify-content:flex-start}}
     `;
     document.head.appendChild(style);
   }
@@ -27,7 +27,10 @@
   const getCart = () => readJson(CART_KEY, []);
   const saveCart = (cart) => { writeJson(CART_KEY, cart); updateCartCount(); };
   const getOrders = () => readJson(ORDERS_KEY, []);
-  const saveOrders = (orders) => writeJson(ORDERS_KEY, orders);
+  const saveOrders = (orders) => {
+    writeJson(ORDERS_KEY, orders);
+    window.dispatchEvent(new CustomEvent("sithinem:orders-updated"));
+  };
   const getTotal = (cart = getCart()) => cart.reduce((total, item) => total + (item.priceValue || 0) * (item.quantity || 0), 0);
 
   function updateCartCount() {
@@ -193,7 +196,7 @@
       list.innerHTML = '<div class="orders-empty"><h3>Aucune commande pour le moment</h3><p>Quand un client validera son panier, sa commande s\'affichera ici avec le créneau, les coordonnées, le message et le total.</p></div>';
       return;
     }
-    list.innerHTML = orders.map((order) => {
+    list.innerHTML = `<p class="admin-sync-note">${orders.length} commande${orders.length > 1 ? "s" : ""} enregistrée${orders.length > 1 ? "s" : ""}. Les nouvelles commandes apparaissent automatiquement dans cet onglet.</p>` + orders.map((order) => {
       const customer = order.customer || {};
       const customerName = [customer.firstName, customer.lastName].filter(Boolean).join(" ") || customer.email || "Client connecté";
       const items = (order.items || []).map((item) => `<li>${escapeHtml(item.quantity)} × ${escapeHtml(item.name)} — ${formatPrice((item.priceValue || 0) * (item.quantity || 0))}</li>`).join("");
@@ -216,11 +219,24 @@
     observer.observe(menuPage, { childList: true, subtree: true });
   }
 
+  function watchAdminOrders() {
+    if (!document.getElementById("admin-orders-list")) return;
+    document.querySelectorAll("[data-admin-tab], [data-admin-open]").forEach((button) => {
+      button.addEventListener("click", () => setTimeout(renderAdminOrders, 50));
+    });
+    window.addEventListener("storage", (event) => {
+      if (event.key === ORDERS_KEY) renderAdminOrders();
+    });
+    window.addEventListener("sithinem:orders-updated", renderAdminOrders);
+    setInterval(renderAdminOrders, 2000);
+  }
+
   function init() {
     injectStyles();
     refreshCartFeatures();
     initCartPage();
     watchMenuCards();
+    watchAdminOrders();
   }
 
   function scheduleInit() {

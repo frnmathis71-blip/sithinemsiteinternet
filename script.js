@@ -3,14 +3,18 @@ const STORAGE_KEY = "sithinemMenuItems";
 const CATEGORY_STORAGE_KEY = "sithinemMenuCategories";
 const BLOCKED_STORAGE_KEY = "sithinemBlockedSlots";
 const SLOT_TIMES = ["18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00"];
-const DEFAULT_CATEGORIES = [
+const REQUIRED_CATEGORIES = [
   { id: "woks", label: "Nos Woks" },
   { id: "snacks", label: "Nos Snacks" },
   { id: "salades", label: "Nos Salades" },
   { id: "boissons", label: "Nos Boissons" },
   { id: "desserts", label: "Nos Desserts" },
+];
+const DEFAULT_EXTRA_CATEGORIES = [
   { id: "offres", label: "Offres" },
 ];
+const DEFAULT_CATEGORIES = [...REQUIRED_CATEGORIES, ...DEFAULT_EXTRA_CATEGORIES];
+const REQUIRED_CATEGORY_IDS = REQUIRED_CATEGORIES.map((category) => category.id);
 let currentWeekStart = getStartOfWeek(new Date());
 let activeMenuCategory = getCategories()[0]?.id || "woks";
 let selectedMenuItemId = null;
@@ -40,13 +44,24 @@ function saveStoredItems(items) {
   writeJson(STORAGE_KEY, items);
 }
 
+function normalizeCategories(categories) {
+  const storedCategories = Array.isArray(categories) ? categories : [];
+  const defaultIds = DEFAULT_CATEGORIES.map((category) => category.id);
+  const customCategories = storedCategories.filter((category) => {
+    return category?.id && category?.label && !defaultIds.includes(category.id);
+  });
+  const storedOffers = storedCategories.find((category) => category.id === "offres");
+  const offersCategory = storedOffers ? [{ id: "offres", label: storedOffers.label || "Offres" }] : DEFAULT_EXTRA_CATEGORIES;
+  return [...REQUIRED_CATEGORIES, ...offersCategory, ...customCategories];
+}
+
 function getCategories() {
   const stored = readJson(CATEGORY_STORAGE_KEY, null);
-  return Array.isArray(stored) && stored.length ? stored : DEFAULT_CATEGORIES;
+  return normalizeCategories(stored || DEFAULT_CATEGORIES);
 }
 
 function saveCategories(categories) {
-  writeJson(CATEGORY_STORAGE_KEY, categories);
+  writeJson(CATEGORY_STORAGE_KEY, normalizeCategories(categories));
 }
 
 function hasCustomMenuData() {
@@ -209,6 +224,14 @@ function initAdminTabs() {
   });
 }
 
+function updateDeleteMenuTabButton() {
+  const button = document.getElementById("delete-menu-tab");
+  if (!button) return;
+  const isRequired = REQUIRED_CATEGORY_IDS.includes(activeMenuCategory);
+  button.disabled = isRequired;
+  button.textContent = isRequired ? "Onglet de base protégé" : "Supprimer l'onglet actif";
+}
+
 function renderMiniMenuTabs() {
   const tabs = document.getElementById("mini-menu-tabs");
   if (!tabs) return;
@@ -228,6 +251,7 @@ function renderMiniMenuTabs() {
     });
     tabs.appendChild(button);
   });
+  updateDeleteMenuTabButton();
 }
 
 function renderMiniMenu() {
@@ -393,6 +417,7 @@ function createMenuItem(type) {
 
 function initMiniMenuAdmin() {
   if (!document.getElementById("mini-menu-grid")) return;
+  saveCategories(getCategories());
   document.getElementById("create-article")?.addEventListener("click", () => createMenuItem("article"));
   document.getElementById("create-offer")?.addEventListener("click", () => createMenuItem("offer"));
   document.getElementById("add-menu-tab")?.addEventListener("click", addMenuTab);
@@ -428,7 +453,11 @@ function addMenuTab() {
 
 function deleteActiveMenuTab() {
   const categories = getCategories();
-  if (categories.length <= 1) return;
+  if (REQUIRED_CATEGORY_IDS.includes(activeMenuCategory)) {
+    alert("Cet onglet est relié aux cases de la page d'accueil et ne peut pas être supprimé.");
+    return;
+  }
+  if (categories.length <= REQUIRED_CATEGORIES.length) return;
   const category = categories.find((entry) => entry.id === activeMenuCategory);
   if (!confirm(`Supprimer l'onglet "${category?.label || activeMenuCategory}" et tous les produits dedans ?`)) return;
   const nextCategories = categories.filter((entry) => entry.id !== activeMenuCategory);

@@ -46,18 +46,15 @@ function saveStoredItems(items) {
 
 function normalizeCategories(categories) {
   const storedCategories = Array.isArray(categories) ? categories : [];
-  const defaultIds = DEFAULT_CATEGORIES.map((category) => category.id);
   const customCategories = storedCategories.filter((category) => {
-    return category?.id && category?.label && !defaultIds.includes(category.id);
+    return category?.id && category?.label && !REQUIRED_CATEGORY_IDS.includes(category.id);
   });
-  const storedOffers = storedCategories.find((category) => category.id === "offres");
-  const offersCategory = storedOffers ? [{ id: "offres", label: storedOffers.label || "Offres" }] : DEFAULT_EXTRA_CATEGORIES;
-  return [...REQUIRED_CATEGORIES, ...offersCategory, ...customCategories];
+  return [...REQUIRED_CATEGORIES, ...customCategories];
 }
 
 function getCategories() {
   const stored = readJson(CATEGORY_STORAGE_KEY, null);
-  return normalizeCategories(stored || DEFAULT_CATEGORIES);
+  return Array.isArray(stored) ? normalizeCategories(stored) : DEFAULT_CATEGORIES;
 }
 
 function saveCategories(categories) {

@@ -202,14 +202,33 @@
     }).join("");
   }
 
-  function init() {
-    injectStyles();
+  function refreshCartFeatures() {
     updateCartCount();
     initMenuButtons();
-    initCartPage();
     renderAdminOrders();
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
+  function watchMenuCards() {
+    const menuPage = document.querySelector(".menu-page");
+    if (!menuPage || menuPage.dataset.cartObserverReady === "true") return;
+    menuPage.dataset.cartObserverReady = "true";
+    const observer = new MutationObserver(() => initMenuButtons());
+    observer.observe(menuPage, { childList: true, subtree: true });
+  }
+
+  function init() {
+    injectStyles();
+    refreshCartFeatures();
+    initCartPage();
+    watchMenuCards();
+  }
+
+  function scheduleInit() {
+    init();
+    [100, 400, 1000].forEach((delay) => setTimeout(refreshCartFeatures, delay));
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", scheduleInit);
+  else scheduleInit();
+  window.addEventListener("load", refreshCartFeatures);
 })();
